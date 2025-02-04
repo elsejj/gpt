@@ -32,7 +32,7 @@ Version: ` + appVersion,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(cfgFile) == 0 {
-			cfgFile = utils.DefaultConfigPath()
+			cfgFile = utils.ConfigPath("config.yaml")
 		}
 		err := utils.InitConfig(cfgFile)
 		if err != nil {
@@ -57,6 +57,7 @@ Version: ` + appVersion,
 			User:      utils.UserPrompt(args),
 			WithUsage: viper.GetBool("usage"),
 			JsonMode:  viper.GetBool("json"),
+			Verbose:   viper.GetBool("verbose"),
 		}
 		w := os.Stdout
 		err = llm.Chat(appConf, w)
@@ -64,6 +65,8 @@ Version: ` + appVersion,
 			slog.Error("Error sending prompt", "err", err)
 			os.Exit(1)
 		}
+		os.Stdout.WriteString("\n")
+		os.Stdout.Sync()
 	},
 }
 
@@ -83,7 +86,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file path, default is "+utils.DefaultConfigPath())
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file path, default is "+utils.ConfigPath("config.yaml"))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -93,6 +96,7 @@ func init() {
 	rootCmd.Flags().BoolP("usage", "u", false, "Show usage")
 	rootCmd.Flags().BoolP("json", "j", false, "force output in json format")
 	rootCmd.Flags().BoolP("version", "v", false, "Show version")
+	rootCmd.Flags().BoolP("verbose", "V", false, "Verbose output")
 
 	viper.BindPFlags(rootCmd.Flags())
 }

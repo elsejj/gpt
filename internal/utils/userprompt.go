@@ -2,7 +2,6 @@ package utils
 
 import (
 	"os"
-	"path"
 	"regexp"
 	"strings"
 )
@@ -11,24 +10,23 @@ func UserPrompt(args []string) string {
 
 	var buf strings.Builder
 
-	confPath := DefaultConfigPath()
-
-	tryReadFile := func(filePath string) {
-		fi, err := os.Stat(filePath)
-		if err == nil && !fi.IsDir() {
-			content, err := os.ReadFile(filePath)
-			if err == nil {
-				buf.WriteString(string(content))
-				buf.WriteString(" ")
-			}
+	tryReadFile := func(filePath string) bool {
+		content, err := os.ReadFile(filePath)
+		if err == nil {
+			buf.WriteString(string(content))
+			buf.WriteString(" ")
+			return true
 		}
+		return false
 	}
 
 	for _, arg := range args {
-		tryReadFile(arg)
-		tryReadFile(path.Join(confPath, arg))
-		buf.WriteString(arg)
-		buf.WriteString(" ")
+		f1 := tryReadFile(arg)
+		f2 := tryReadFile(ConfigPath(arg))
+		if !f1 && !f2 {
+			buf.WriteString(arg)
+			buf.WriteString(" ")
+		}
 	}
 
 	all := buf.String()

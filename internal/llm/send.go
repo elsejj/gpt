@@ -65,6 +65,13 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 		)
 	}
 
+	if conf.Prompt.Verbose {
+		body, _ := req.MarshalJSON()
+		w.Write([]byte("Request: "))
+		w.Write(body)
+		w.Write([]byte("\n"))
+	}
+
 	s := client.Chat.Completions.NewStreaming(ctx, req)
 	var usage openai.CompletionUsage
 	for s.Next() {

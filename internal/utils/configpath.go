@@ -9,7 +9,7 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-func DefaultConfigPath() string {
+func ConfigPath(fileName ...string) string {
 
 	isWindows := runtime.GOOS == "windows"
 
@@ -19,15 +19,15 @@ func DefaultConfigPath() string {
 		panic(err)
 	}
 	if isWindows {
-		return filepath.Join(home, "AppData", "Roaming", "gpt", "config.yaml")
+		return filepath.Join(home, "AppData", "Roaming", "gpt", filepath.Join(fileName...))
 	} else {
-		return filepath.Join(home, ".config", "gpt", "config.yaml")
+		return filepath.Join(home, ".config", "gpt", filepath.Join(fileName...))
 	}
 }
 
 func InitConfig(fileName string) error {
 	if fileName == "" {
-		fileName = DefaultConfigPath()
+		fileName = ConfigPath("config.yaml")
 	}
 	baseDir := filepath.Dir(fileName)
 
@@ -68,7 +68,7 @@ func InitConfig(fileName string) error {
 
 func LoadConfig(fileName string) (*AppConf, error) {
 	if fileName == "" {
-		fileName = DefaultConfigPath()
+		fileName = ConfigPath("config.yaml")
 	}
 	body, err := os.ReadFile(fileName)
 	if err != nil {

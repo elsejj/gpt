@@ -13,6 +13,7 @@ type Prompt struct {
 	User      string
 	WithUsage bool
 	JsonMode  bool
+	Verbose   bool
 }
 
 type AppConf struct {
