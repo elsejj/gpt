@@ -55,3 +55,22 @@ It's show you the app version, and the configuration file path. Then you can edi
 You can use a LLM gateway such as [Portkey-AI](https://github.com/Portkey-AI/gateway) to serve the Non-OpenAI compatible API like Gemini, Claude, etc.
 
 I had made a fork of the Portkey-AI gateway, which is available at [llm-gateway](https://github.com/elsejj/llm-gateway/tree/keystore), enable one key to visit multiple API services.
+
+# Integration Example
+
+## Powershell Copilot
+
+1. copy 'samples/powershell.md' to configuration folder
+2. create a function in your profile `$PROFILE.CurrentUserCurrentHost`:
+
+```powershell
+function pa {
+    $cmd = gpt -s powershell.md $args
+    Write-Host $cmd
+    Set-Clipboard -Value $cmd.Trim()
+}
+```
+
+now you can use `pa` to generate the powershell command. for example:
+
+- `pa list all image files by date desc` will generate `Get-ChildItem | Sort-Object LastWriteTime -Descending` and copy to clipboard.

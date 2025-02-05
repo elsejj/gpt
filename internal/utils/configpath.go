@@ -49,6 +49,18 @@ func InitConfig(fileName string) error {
 				Provider: "openai",
 				Model:    "gpt-4o-mini",
 			},
+			LLMs: map[string]LLM{
+				"openai": {
+					Provider: "openai",
+					Model:    "gpt-4o",
+				},
+				"deepseek": {
+					Gateway:  "https://api.deepseek.ai/v1/",
+					ApiKey:   "your-api-key",
+					Provider: "deepseek",
+					Model:    "deepseek-chat",
+				},
+			},
 		}
 
 		body, err := yaml.Marshal(&appConf)

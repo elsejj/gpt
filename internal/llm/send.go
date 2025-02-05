@@ -1,10 +1,12 @@
 package llm
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -67,15 +69,20 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 
 	if conf.Prompt.Verbose {
 		body, _ := req.MarshalJSON()
-		w.Write([]byte("Request: "))
-		w.Write(body)
-		w.Write([]byte("\n"))
+		slog.Info("Request", "body", string(body))
 	}
 
 	s := client.Chat.Completions.NewStreaming(ctx, req)
+	if s.Err() != nil {
+		return s.Err()
+	}
+
 	var usage openai.CompletionUsage
 	for s.Next() {
 		cur := s.Current()
+		if conf.Prompt.Verbose {
+			slog.Info("stream", "chunk", cur.JSON.RawJSON())
+		}
 		for _, c := range cur.Choices {
 			w.Write([]byte(c.Delta.Content))
 		}
@@ -84,7 +91,7 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 	s.Close()
 
 	if conf.Prompt.WithUsage {
-		fmt.Fprintf(w, "\n(Prompt: %d, Completion: %d)\n", usage.PromptTokens, usage.CompletionTokens)
+		slog.Info("Usage", "prompt", usage.PromptTokens, "completion", usage.CompletionTokens, "provider", conf.LLM.Provider, "model", conf.LLM.Model)
 	}
 
 	return nil
@@ -98,4 +105,24 @@ func DataURLOfImageFile(filePath string) string {
 	base64Body := base64.StdEncoding.EncodeToString(body)
 	mimeType := http.DetectContentType(body)
 	return fmt.Sprintf("data:%s;base64,%s", mimeType, base64Body)
+}
+
+func ExtractCodeBlock(text []byte) []byte {
+	codeStart := bytes.Index(text, []byte("```"))
+	if codeStart < 0 {
+		// no code block
+		return text
+	}
+	nextLine := bytes.Index(text[codeStart:], []byte("\n"))
+	if nextLine < 0 {
+		codeStart += 3
+	} else {
+		codeStart += nextLine + 1
+	}
+	codeEnd := bytes.Index(text[codeStart:], []byte("```"))
+	if codeEnd < 0 {
+		// no code block
+		return text
+	}
+	return text[codeStart : codeStart+codeEnd]
 }

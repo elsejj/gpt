@@ -4,8 +4,10 @@ Copyright © 2025 elsejj
 package cmd
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 
@@ -31,6 +33,11 @@ Version: ` + appVersion,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
+
+		//logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+
+		//slog.SetDefault(logger)
+
 		if len(cfgFile) == 0 {
 			cfgFile = utils.ConfigPath("config.yaml")
 		}
@@ -52,21 +59,33 @@ Version: ` + appVersion,
 		}
 
 		appConf.Prompt = &utils.Prompt{
-			System:    utils.UserPrompt(viper.GetStringSlice("system")),
-			Images:    viper.GetStringSlice("images"),
-			User:      utils.UserPrompt(args),
-			WithUsage: viper.GetBool("usage"),
-			JsonMode:  viper.GetBool("json"),
-			Verbose:   viper.GetBool("verbose"),
+			System:        utils.UserPrompt(viper.GetStringSlice("system")),
+			Images:        viper.GetStringSlice("images"),
+			User:          utils.UserPrompt(args),
+			WithUsage:     viper.GetBool("usage"),
+			JsonMode:      viper.GetBool("json"),
+			Verbose:       viper.GetBool("verbose"),
+			OverrideModel: viper.GetString("model"),
+			OnlyCodeBlock: viper.GetBool("code"),
 		}
-		w := os.Stdout
+		appConf.PickupModel()
+		var w io.Writer
+		if appConf.Prompt.OnlyCodeBlock || appConf.Prompt.JsonMode {
+			w = bytes.NewBuffer(nil)
+		} else {
+			w = os.Stdout
+		}
 		err = llm.Chat(appConf, w)
 		if err != nil {
 			slog.Error("Error sending prompt", "err", err)
 			os.Exit(1)
 		}
-		os.Stdout.WriteString("\n")
-		os.Stdout.Sync()
+		w.Write([]byte("\n"))
+
+		if appConf.Prompt.OnlyCodeBlock || appConf.Prompt.JsonMode {
+			buf := w.(*bytes.Buffer)
+			os.Stdout.Write(llm.ExtractCodeBlock(buf.Bytes()))
+		}
 	},
 }
 
@@ -97,6 +116,8 @@ func init() {
 	rootCmd.Flags().BoolP("json", "j", false, "force output in json format")
 	rootCmd.Flags().BoolP("version", "v", false, "Show version")
 	rootCmd.Flags().BoolP("verbose", "V", false, "Verbose output")
+	rootCmd.Flags().StringP("model", "m", "", "Model override default model, with format 'model[:provider]'")
+	rootCmd.Flags().BoolP("code", "c", false, "extract first code block if exists, useful for pipe code generation to next command")
 
 	viper.BindPFlags(rootCmd.Flags())
 }
