@@ -34,6 +34,47 @@ gpt -s samples/system.md "who are you?"
 
 `-s` flag is used to specify the system prompt. in this case, it force translate the user input to chinese language instead answering the question directly.
 
+## with mcp server
+
+input
+
+```bash
+gpt -M "/xxxx/server.py" 'what is result of 223020320+2321?'
+```
+
+output
+
+```
+I am calculating the result of 223020320 + 2321.
+2025/03/05 18:18:44 INFO Model call tool=add args="{\"a\":223020320,\"b\":2321}"
+2025/03/05 18:18:44 INFO Model call result tool=add result="{Content:[{223022641 text}] Role:tool ToolCallID:call_74245828}"
+The result of 223020320 + 2321 is 223022641.
+
+```
+
+the `server.py` is a simple mcp server script, with a tool named `add`, see [MCP Python SDK
+](https://github.com/modelcontextprotocol/python-sdk) for more details.
+
+`-M` flag is used to specify the mcp server script. If you have a mcp server running, you can use this flag to send the request to the script. Ensure that the script is executable and correctly configured to process the input.
+
+There are two kinds of mcp server:
+
+- Local mcp server, communicate with STDIN/STDOUT
+
+  - Local mcp server will be started as a child process.
+  - Each `-M` flag will start a new mcp server, the flag will be split by ` `(space), and the first part is the executable path, the rest is the arguments.
+  - Multiple `-M` flags can be used to start multiple mcp servers. All tools will be passed to the LLM.
+  - The executable can be:
+    - `.py` python script, `python3` will be used to run the script, `.venv` will be used if exists.
+    - `.js` javascript script, `node` will be used to run the script.
+    - `.ts` typescript script, `bun` will be used to run the script.
+    - `.go` go script, `go run` will be used to run the script.
+    - `.sh` `.bash` `.ps1` will be run as shell script.
+    - any other executable file.
+
+- Remote mcp server, communicate with HTTP SSE
+  - `-M` flag will be used to specify the mcp server url, and the request will be sent to the url.
+
 # Installation
 
 ```bash

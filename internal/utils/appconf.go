@@ -1,6 +1,10 @@
 package utils
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/elsejj/gpt/internal/mcps"
+)
 
 type LLM struct {
 	Gateway  string `yaml:"gateway,omitempty" json:"gateway,omitempty"`
@@ -15,9 +19,9 @@ type Prompt struct {
 	User          string
 	WithUsage     bool
 	JsonMode      bool
-	Verbose       bool
 	OverrideModel string
 	OnlyCodeBlock bool
+	MCPServers    *mcps.MCPs
 }
 
 type AppConf struct {

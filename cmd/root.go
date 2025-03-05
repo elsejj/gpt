@@ -12,6 +12,7 @@ import (
 	"os"
 
 	"github.com/elsejj/gpt/internal/llm"
+	"github.com/elsejj/gpt/internal/mcps"
 	"github.com/elsejj/gpt/internal/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -34,9 +35,14 @@ Version: ` + appVersion,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 
-		//logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
-
-		//slog.SetDefault(logger)
+		verbose := viper.GetInt("verbose")
+		if verbose >= 2 {
+			slog.SetLogLoggerLevel(slog.LevelDebug)
+		} else if verbose >= 1 {
+			slog.SetLogLoggerLevel(slog.LevelInfo)
+		} else {
+			slog.SetLogLoggerLevel(slog.LevelWarn)
+		}
 
 		if len(cfgFile) == 0 {
 			cfgFile = utils.ConfigPath("config.yaml")
@@ -64,10 +70,16 @@ Version: ` + appVersion,
 			User:          utils.UserPrompt(args),
 			WithUsage:     viper.GetBool("usage"),
 			JsonMode:      viper.GetBool("json"),
-			Verbose:       viper.GetBool("verbose"),
 			OverrideModel: viper.GetString("model"),
 			OnlyCodeBlock: viper.GetBool("code"),
 		}
+		mcpServers, err := mcps.New(viper.GetStringSlice("mcp")...)
+		if err != nil {
+			slog.Error("Error creating mcp client", "err", err)
+			os.Exit(1)
+		}
+		appConf.Prompt.MCPServers = mcpServers
+
 		appConf.PickupModel()
 		var w io.Writer
 		if appConf.Prompt.OnlyCodeBlock || appConf.Prompt.JsonMode {
@@ -80,7 +92,6 @@ Version: ` + appVersion,
 			slog.Error("Error sending prompt", "err", err)
 			os.Exit(1)
 		}
-		w.Write([]byte("\n"))
 
 		if appConf.Prompt.OnlyCodeBlock || appConf.Prompt.JsonMode {
 			buf := w.(*bytes.Buffer)
@@ -114,10 +125,11 @@ func init() {
 	rootCmd.Flags().StringArrayP("images", "i", []string{}, "Images to be used as prompt")
 	rootCmd.Flags().BoolP("usage", "u", false, "Show usage")
 	rootCmd.Flags().BoolP("json", "j", false, "force output in json format")
-	rootCmd.Flags().BoolP("version", "v", false, "Show version")
-	rootCmd.Flags().BoolP("verbose", "V", false, "Verbose output")
+	rootCmd.Flags().BoolP("version", "V", false, "Show version")
+	rootCmd.Flags().IntP("verbose", "v", 0, "Verbose level, 0-2, default 0, 0 is no verbose")
 	rootCmd.Flags().StringP("model", "m", "", "Model override default model, with format 'model[:provider]'")
 	rootCmd.Flags().BoolP("code", "c", false, "extract first code block if exists, useful for pipe code generation to next command")
+	rootCmd.Flags().StringArrayP("mcp", "M", []string{}, "model context provider to be used, can be a file path(stdio) or a url(sse)")
 
 	viper.BindPFlags(rootCmd.Flags())
 }

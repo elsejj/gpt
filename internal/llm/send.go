@@ -51,6 +51,9 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 		Model:    openai.F(conf.LLM.Model),
 		Messages: openai.F(messages),
 	}
+	if conf.Prompt.MCPServers != nil {
+		req.Tools = openai.F(conf.Prompt.MCPServers.Tools)
+	}
 
 	if conf.Prompt.JsonMode {
 		req.ResponseFormat = openai.F[openai.ChatCompletionNewParamsResponseFormatUnion](
@@ -67,10 +70,8 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 		)
 	}
 
-	if conf.Prompt.Verbose {
-		body, _ := req.MarshalJSON()
-		slog.Info("Request", "body", string(body))
-	}
+	body, _ := req.MarshalJSON()
+	slog.Debug("Request", "body", string(body))
 
 	s := client.Chat.Completions.NewStreaming(ctx, req)
 	if s.Err() != nil {
@@ -78,17 +79,84 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 	}
 
 	var usage openai.CompletionUsage
+	toolCalls := make(map[int64]*openai.ChatCompletionChunkChoicesDeltaToolCall)
 	for s.Next() {
 		cur := s.Current()
-		if conf.Prompt.Verbose {
-			slog.Info("stream", "chunk", cur.JSON.RawJSON())
-		}
+		slog.Debug("stream", "chunk", cur.JSON.RawJSON())
 		for _, c := range cur.Choices {
 			w.Write([]byte(c.Delta.Content))
+			for _, toolCall := range c.Delta.ToolCalls {
+				tc, ok := toolCalls[c.Index]
+				if !ok {
+					tc = &toolCall
+					toolCalls[c.Index] = tc
+				} else {
+					tc.Function.Arguments += toolCall.Function.Arguments
+				}
+			}
 		}
 		usage = cur.Usage
 	}
 	s.Close()
+
+	if len(toolCalls) > 0 {
+		w.Write([]byte("\n"))
+		toolCallMessages := make([]openai.ChatCompletionMessageParamUnion, 0)
+		for _, toolCall := range toolCalls {
+			slog.Info("Model call ", "tool", toolCall.Function.Name, "args", toolCall.Function.Arguments)
+			toolResult, err := conf.Prompt.MCPServers.CallToolOpenAI(ctx, *toolCall)
+			if err != nil {
+				slog.Error("Error calling tool", "tool", toolCall.Function.Name)
+				return err
+			}
+			toolCallMessages = append(toolCallMessages, toolResult)
+			slog.Info("Model call result ", "tool", toolCall.Function.Name, "result", toolResult)
+		}
+		// there are tool results
+		messages = append(messages, toolCallMessages...)
+
+		req := openai.ChatCompletionNewParams{
+			Model:    openai.F(conf.LLM.Model),
+			Messages: openai.F(messages),
+		}
+		if conf.Prompt.JsonMode {
+			req.ResponseFormat = openai.F[openai.ChatCompletionNewParamsResponseFormatUnion](
+				openai.ResponseFormatJSONObjectParam{
+					Type: openai.F(openai.ResponseFormatJSONObjectTypeJSONObject),
+				},
+			)
+		}
+		if conf.Prompt.WithUsage {
+			req.StreamOptions = openai.F(
+				openai.ChatCompletionStreamOptionsParam{
+					IncludeUsage: openai.F(true),
+				},
+			)
+		}
+
+		body, _ := req.MarshalJSON()
+		slog.Debug("Request", "body", string(body))
+
+		s := client.Chat.Completions.NewStreaming(ctx, req)
+		if s.Err() != nil {
+			return s.Err()
+		}
+
+		var nextUsage openai.CompletionUsage
+		for s.Next() {
+			cur := s.Current()
+			slog.Debug("stream", "chunk", cur.JSON.RawJSON())
+			for _, c := range cur.Choices {
+				w.Write([]byte(c.Delta.Content))
+			}
+			nextUsage = cur.Usage
+		}
+		usage.PromptTokens += nextUsage.PromptTokens
+		usage.CompletionTokens += nextUsage.CompletionTokens
+		usage.TotalTokens += nextUsage.TotalTokens
+		s.Close()
+	}
+	w.Write([]byte("\n"))
 
 	if conf.Prompt.WithUsage {
 		slog.Info("Usage", "prompt", usage.PromptTokens, "completion", usage.CompletionTokens, "provider", conf.LLM.Provider, "model", conf.LLM.Model)
