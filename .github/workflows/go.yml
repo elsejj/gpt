@@ -1,0 +1,28 @@
+name: Main
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: "go.mod"
+
+      - name: Build
+        run: make all
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/linux/gpt-linux-amd64.tar.gz 
+            dist/mac/gpt-darwin-arm64.tar.gz
+            dist/win/gpt-windows-amd64.zip
