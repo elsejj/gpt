@@ -78,6 +78,7 @@ Version: ` + appVersion,
 			slog.Error("Error creating mcp client", "err", err)
 			os.Exit(1)
 		}
+		defer mcpServers.Shutdown()
 		appConf.Prompt.MCPServers = mcpServers
 
 		appConf.PickupModel()
