@@ -3,9 +3,9 @@ module github.com/elsejj/gpt
 go 1.23.4
 
 require (
-	github.com/goccy/go-yaml v1.15.17
-	github.com/openai/openai-go v0.1.0-alpha.52
-	github.com/spf13/cobra v1.8.1
+	github.com/goccy/go-yaml v1.15.23
+	github.com/openai/openai-go v0.1.0-alpha.61
+	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.19.0
 )
 
@@ -28,9 +28,9 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/exp v0.0.0-20250128182459-e0ece0dbea4c // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/exp v0.0.0-20250228200357-dead58393ab7 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
