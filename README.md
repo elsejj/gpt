@@ -58,19 +58,26 @@ I had made a fork of the Portkey-AI gateway, which is available at [llm-gateway]
 
 # Integration Example
 
-## Powershell Copilot
+## Powershell/bash Copilot
 
-1. copy 'samples/powershell.md' to configuration folder
-2. create a function in your profile `$PROFILE.CurrentUserCurrentHost`:
+1. copy `samples/powershell.md` / `samples/bash.md` to configuration folder
+2. for powershell, create a function in your profile `$PROFILE.CurrentUserCurrentHost`:
 
 ```powershell
 function pa {
-    $cmd = gpt -s powershell.md $args
+    $cmd = gpt -u -s powershell.md $args
     Write-Host $cmd
     Set-Clipboard -Value $cmd.Trim()
 }
 ```
 
+3. for bash, add the following line to your `.bashrc`:
+
+```bash
+alias pa='gpt -u -s bash.md'
+```
+
 now you can use `pa` to generate the powershell command. for example:
 
 - `pa list all image files by date desc` will generate `Get-ChildItem | Sort-Object LastWriteTime -Descending` and copy to clipboard.
+- `pa list recent 10 files` will generate `ls -lt | head -n 10` and copy to clipboard.
