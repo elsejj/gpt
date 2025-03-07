@@ -1,3 +1,7 @@
+## v0.2.2
+
+- more compatible with `mcp` server
+
 ## v0.2.1
 
 ### Fixed
