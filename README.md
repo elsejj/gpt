@@ -40,6 +40,9 @@ input
 
 ```bash
 gpt -M "/xxxx/server.py" 'what is result of 223020320+2321?'
+or
+gpt -M "http://127.0.0.1:8000/sse" 'what is result of 223020320+2321?'
+
 ```
 
 output
