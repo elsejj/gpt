@@ -8,7 +8,8 @@ func TestStart(t *testing.T) {
 
 	//fileSystemProvider := "/home/jia/tools/mcp_servers/src/filesystem/index.ts /home/jia/tools/mcp_servers"
 
-	fileSystemProvider := "/home/jia/temp/py_mcp/server.py"
+	//fileSystemProvider := "/home/jia/temp/py_mcp/server.py"
+	fileSystemProvider := "http://127.0.0.1:8000/qtf/sse"
 
 	s, err := New(fileSystemProvider)
 	if err != nil {

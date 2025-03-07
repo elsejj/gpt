@@ -1,6 +1,8 @@
 package mcps
 
 import (
+	"context"
+	"log/slog"
 	"os"
 	"path"
 	"runtime"
@@ -42,6 +44,11 @@ func NewLocalClient(provider string) (*McpClient, error) {
 func NewRemoteClient(provider string) (*McpClient, error) {
 	client, err := mcpc.NewSSEMCPClient(provider)
 	if err != nil {
+		return nil, err
+	}
+	err = client.Start(context.Background())
+	if err != nil {
+		slog.Error("Failed to start MCP client", "error", err)
 		return nil, err
 	}
 	return &McpClient{

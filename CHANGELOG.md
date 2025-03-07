@@ -1,3 +1,9 @@
+## v0.2.1
+
+### Fixed
+
+- Fix `mcp` sse, it should `Start` before to use.
+
 ## v0.2.0
 
 ### Added
