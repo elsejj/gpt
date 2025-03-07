@@ -53,6 +53,8 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 	}
 	if conf.Prompt.MCPServers != nil {
 		req.Tools = openai.F(conf.Prompt.MCPServers.Tools)
+		req.ToolChoice = openai.F(openai.ChatCompletionToolChoiceOptionUnionParam(openai.ChatCompletionToolChoiceOptionAutoRequired))
+		//req.Functions = openai.F(conf.Prompt.MCPServers.Functions)
 	}
 
 	if conf.Prompt.JsonMode {
@@ -102,6 +104,7 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 	if len(toolCalls) > 0 {
 		w.Write([]byte("\n"))
 		toolCallMessages := make([]openai.ChatCompletionMessageParamUnion, 0)
+		assistantToolCalls := make([]openai.ChatCompletionMessageToolCallParam, 0)
 		for _, toolCall := range toolCalls {
 			slog.Info("Model call ", "tool", toolCall.Function.Name, "args", toolCall.Function.Arguments)
 			toolResult, err := conf.Prompt.MCPServers.CallToolOpenAI(ctx, *toolCall)
@@ -109,10 +112,25 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 				slog.Error("Error calling tool", "tool", toolCall.Function.Name)
 				return err
 			}
+			assistantToolCalls = append(assistantToolCalls, openai.ChatCompletionMessageToolCallParam{
+				ID: openai.F(toolCall.ID),
+				Function: openai.F(openai.ChatCompletionMessageToolCallFunctionParam{
+					Name:      openai.F(toolCall.Function.Name),
+					Arguments: openai.F(toolCall.Function.Arguments),
+				}),
+				Type: openai.F(openai.ChatCompletionMessageToolCallTypeFunction),
+			})
 			toolCallMessages = append(toolCallMessages, toolResult)
 			slog.Info("Model call result ", "tool", toolCall.Function.Name, "result", toolResult)
 		}
+
+		assistantMessage := openai.ChatCompletionAssistantMessageParam{
+			Role:      openai.F(openai.ChatCompletionAssistantMessageParamRoleAssistant),
+			ToolCalls: openai.F(assistantToolCalls),
+		}
+
 		// there are tool results
+		messages = append(messages, assistantMessage)
 		messages = append(messages, toolCallMessages...)
 
 		req := openai.ChatCompletionNewParams{

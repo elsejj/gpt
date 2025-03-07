@@ -15,12 +15,15 @@ type MCPs struct {
 	toolToClient map[string]*McpClient
 	clients      []*McpClient
 	Tools        []openai.ChatCompletionToolParam
+	Functions    []openai.ChatCompletionNewParamsFunction
 }
 
 func New(providers ...string) (*MCPs, error) {
 	mcps := &MCPs{
 		toolToClient: make(map[string]*McpClient),
 		clients:      make([]*McpClient, 0),
+		Tools:        make([]openai.ChatCompletionToolParam, 0),
+		Functions:    make([]openai.ChatCompletionNewParamsFunction, 0),
 	}
 
 	for _, provider := range providers {
@@ -37,6 +40,7 @@ func New(providers ...string) (*MCPs, error) {
 
 	ctx := context.Background()
 	tools := make([]openai.ChatCompletionToolParam, 0)
+	functions := make([]openai.ChatCompletionNewParamsFunction, 0)
 	for _, client := range mcps.clients {
 		_, err := client.client.Initialize(ctx, mcp.InitializeRequest{})
 		if err != nil {
@@ -66,9 +70,15 @@ func New(providers ...string) (*MCPs, error) {
 					Parameters:  openai.F(shared.FunctionParameters(params)),
 				}),
 			})
+			functions = append(functions, openai.ChatCompletionNewParamsFunction{
+				Name:        openai.String(tool.Name),
+				Description: openai.String(description),
+				Parameters:  openai.F(shared.FunctionParameters(params)),
+			})
 		}
 	}
 	mcps.Tools = tools
+	mcps.Functions = functions
 
 	return mcps, nil
 }
