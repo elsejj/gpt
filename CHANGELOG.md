@@ -1,3 +1,8 @@
+## v0.2.3
+
+- more compatible
+- support only model name
+
 ## v0.2.2
 
 - more compatible with `mcp` server
