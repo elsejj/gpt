@@ -60,6 +60,7 @@ func (c *AppConf) PickupModel() {
 			} else {
 				// model is not in llms, user just want to change model
 				c.LLM.Model = model
+				c.LLM.Provider = ""
 			}
 		}
 		if len(provider) > 0 {

@@ -51,7 +51,7 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 		Model:    openai.F(conf.LLM.Model),
 		Messages: openai.F(messages),
 	}
-	if conf.Prompt.MCPServers != nil {
+	if conf.Prompt.MCPServers != nil && len(conf.Prompt.MCPServers.Tools) > 0 {
 		req.Tools = openai.F(conf.Prompt.MCPServers.Tools)
 		req.ToolChoice = openai.F(openai.ChatCompletionToolChoiceOptionUnionParam(openai.ChatCompletionToolChoiceOptionAutoRequired))
 		//req.Functions = openai.F(conf.Prompt.MCPServers.Functions)
