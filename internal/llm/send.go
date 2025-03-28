@@ -92,9 +92,6 @@ func ExtractCodeBlock(text []byte) []byte {
 }
 
 func llmToolCall(ctx context.Context, client *openai.Client, messages []openai.ChatCompletionMessageParamUnion, conf *utils.AppConf, w io.Writer) ([]openai.ChatCompletionMessageParamUnion, openai.CompletionUsage, error) {
-	if conf == nil || len(conf.Prompt.MCPServers.Tools) == 0 {
-		return messages, openai.CompletionUsage{}, nil
-	}
 	var totalUsage openai.CompletionUsage
 	for {
 
@@ -103,8 +100,10 @@ func llmToolCall(ctx context.Context, client *openai.Client, messages []openai.C
 			Model:    openai.F(conf.LLM.Model),
 			Messages: openai.F(messages),
 		}
-		req.Tools = openai.F(conf.Prompt.MCPServers.Tools)
-		req.ToolChoice = openai.F(openai.ChatCompletionToolChoiceOptionUnionParam(openai.ChatCompletionToolChoiceOptionAutoAuto))
+		if conf.Prompt.MCPServers != nil && len(conf.Prompt.MCPServers.Tools) > 0 {
+			req.Tools = openai.F(conf.Prompt.MCPServers.Tools)
+			req.ToolChoice = openai.F(openai.ChatCompletionToolChoiceOptionUnionParam(openai.ChatCompletionToolChoiceOptionAutoAuto))
+		}
 
 		if conf.Prompt.WithUsage {
 			req.StreamOptions = openai.F(
