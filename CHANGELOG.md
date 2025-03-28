@@ -1,3 +1,7 @@
+## v0.2.4
+
+- enable multiple round 'mcp' call
+
 ## v0.2.3
 
 - more compatible
