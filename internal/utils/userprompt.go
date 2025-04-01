@@ -3,7 +3,9 @@ package utils
 import (
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
+	"time"
 )
 
 func UserPrompt(args []string) string {
@@ -32,7 +34,6 @@ func UserPrompt(args []string) string {
 	all := buf.String()
 
 	// replace all word starts with @ to file content
-
 	r := regexp.MustCompile(`@([^\s]+)`)
 	all = r.ReplaceAllStringFunc(all, func(s string) string {
 		filePath := strings.TrimPrefix(s, "@")
@@ -43,5 +44,39 @@ func UserPrompt(args []string) string {
 		return string(content)
 	})
 
+	// replace all variable with format {{varName}}
+	rVar := regexp.MustCompile(`{{([^\}]+)}}`)
+	all = rVar.ReplaceAllStringFunc(all, func(s string) string {
+		varName := strings.TrimPrefix(s, "{{")
+		varName = strings.TrimSuffix(varName, "}}")
+		varName = strings.TrimSpace(varName)
+
+		varValue, ok := getVariableValue(varName)
+		if ok {
+			return varValue
+		}
+		return s
+	})
+
 	return all
+}
+
+var globalVariables = map[string]string{
+	"OS":    runtime.GOOS,
+	"TODAY": time.Now().Format(time.RFC3339),
+	"SHELL": shellName(),
+}
+
+func shellName() string {
+	if runtime.GOOS == "windows" {
+		return "powershell"
+	}
+	return "bash"
+}
+
+func getVariableValue(varName string) (string, bool) {
+	if val, ok := globalVariables[strings.ToUpper(varName)]; ok {
+		return val, true
+	}
+	return "", false
 }
