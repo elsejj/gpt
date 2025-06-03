@@ -1,3 +1,9 @@
+
+# v0.2.5
+
+- `openai` SDK upgrade to v1
+- `mcp` support stream http transport, will be indicated by URL don't have `sse` in it.
+
 ## v0.2.4
 
 - enable multiple round 'mcp' call
