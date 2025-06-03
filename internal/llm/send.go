@@ -121,6 +121,8 @@ func llmToolCall(ctx context.Context, client *openai.Client, messages []openai.C
 			)
 		}
 
+		req.Temperature = openai.F(conf.Prompt.Temperature)
+
 		body, _ := req.MarshalJSON()
 		slog.Debug("Request", "body", string(body))
 

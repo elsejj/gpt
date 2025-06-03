@@ -21,6 +21,7 @@ type Prompt struct {
 	JsonMode      bool
 	OverrideModel string
 	OnlyCodeBlock bool
+	Temperature   float64
 	MCPServers    *mcps.MCPs
 }
 

@@ -72,6 +72,7 @@ Version: ` + appVersion,
 			JsonMode:      viper.GetBool("json"),
 			OverrideModel: viper.GetString("model"),
 			OnlyCodeBlock: viper.GetBool("code"),
+			Temperature:   viper.GetFloat64("temperature"),
 		}
 		mcpServers, err := mcps.New(viper.GetStringSlice("mcp")...)
 		if err != nil {
@@ -121,7 +122,7 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().Float64P("temperature", "t", 1.0, "the temperature of the model")
 	rootCmd.Flags().StringArrayP("system", "s", []string{}, "System prompt")
 	rootCmd.Flags().StringArrayP("images", "i", []string{}, "Images to be used as prompt")
 	rootCmd.Flags().BoolP("usage", "u", false, "Show usage")
