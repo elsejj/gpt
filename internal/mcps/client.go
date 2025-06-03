@@ -42,9 +42,20 @@ func NewLocalClient(provider string) (*McpClient, error) {
 }
 
 func NewRemoteClient(provider string) (*McpClient, error) {
-	client, err := mcpc.NewSSEMCPClient(provider)
-	if err != nil {
-		return nil, err
+	var client *mcpc.Client
+	var err error
+	if !strings.Contains(provider, "sse") {
+		client, err = mcpc.NewStreamableHttpClient(provider)
+		if err != nil {
+			slog.Error("Failed to create HTTP client", "provider", provider, "error", err)
+			return nil, err
+		}
+	} else {
+		client, err = mcpc.NewSSEMCPClient(provider)
+		if err != nil {
+			slog.Error("Failed to create SSE client", "provider", provider, "error", err)
+			return nil, err
+		}
 	}
 	err = client.Start(context.Background())
 	if err != nil {

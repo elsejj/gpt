@@ -60,12 +60,11 @@ func New(providers ...string) (*MCPs, error) {
 			}
 			description := tool.Description
 			tools = append(tools, openai.ChatCompletionToolParam{
-				Type: openai.F(openai.ChatCompletionToolTypeFunction),
-				Function: openai.F(openai.FunctionDefinitionParam{
-					Name:        openai.String(tool.Name),
+				Function: openai.FunctionDefinitionParam{
+					Name:        tool.Name,
 					Description: openai.String(description),
-					Parameters:  openai.F(shared.FunctionParameters(params)),
-				}),
+					Parameters:  shared.FunctionParameters(params),
+				},
 			})
 		}
 	}
@@ -81,14 +80,14 @@ func (m *MCPs) Shutdown() {
 	m.clients = nil
 	m.toolToClient = nil
 }
-func (m *MCPs) CallToolOpenAI(ctx context.Context, toolCall openai.ChatCompletionChunkChoicesDeltaToolCall) (openai.ChatCompletionMessageParamUnion, error) {
+func (m *MCPs) CallToolOpenAI(ctx context.Context, toolCall openai.ChatCompletionChunkChoiceDeltaToolCall) (openai.ChatCompletionMessageParamUnion, error) {
 	toolName := toolCall.Function.Name
 	callID := toolCall.ID
 	args := make(map[string]any)
 
 	err := json.Unmarshal([]byte(toolCall.Function.Arguments), &args)
 	if err != nil {
-		return nil, err
+		return openai.ChatCompletionMessageParamUnion{}, err
 	}
 
 	return m.CallTool(ctx, callID, toolName, args)
@@ -98,7 +97,7 @@ func (m *MCPs) CallTool(ctx context.Context, callID string, toolName string, arg
 
 	client, ok := m.toolToClient[toolName]
 	if !ok {
-		return nil, errors.New(toolName + " tool not found")
+		return openai.ChatCompletionMessageParamUnion{}, errors.New(toolName + " tool not found")
 	}
 	req := mcp.CallToolRequest{}
 	req.Params.Name = toolName
@@ -106,7 +105,7 @@ func (m *MCPs) CallTool(ctx context.Context, callID string, toolName string, arg
 
 	resp, err := client.client.CallTool(ctx, req)
 	if err != nil {
-		return nil, err
+		return openai.ChatCompletionMessageParamUnion{}, err
 	}
 
 	if resp.IsError {
@@ -117,17 +116,17 @@ func (m *MCPs) CallTool(ctx context.Context, callID string, toolName string, arg
 				errMsg = textContent.Text
 			}
 		}
-		return nil, errors.New(toolName + " call tool error:" + errMsg)
+		return openai.ChatCompletionMessageParamUnion{}, errors.New(toolName + " call tool error:" + errMsg)
 	}
 
 	if len(resp.Content) == 0 {
-		return nil, errors.New(toolName + " no content")
+		return openai.ChatCompletionMessageParamUnion{}, errors.New(toolName + " no content")
 	}
 
 	callResult, ok := resp.Content[0].(mcp.TextContent)
 	if !ok {
-		return nil, errors.New(toolName + "invalid content type")
+		return openai.ChatCompletionMessageParamUnion{}, errors.New(toolName + "invalid content type")
 	}
 
-	return openai.ToolMessage(callID, callResult.Text), nil
+	return openai.ToolMessage(callResult.Text, callID), nil
 }

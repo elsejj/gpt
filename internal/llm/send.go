@@ -35,18 +35,20 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 		messages = append(messages, openai.UserMessage(conf.Prompt.User))
 	} else {
 		parts := []openai.ChatCompletionContentPartUnionParam{
-			openai.TextPart(conf.Prompt.User),
+			openai.TextContentPart(conf.Prompt.User),
 		}
 		for _, img := range conf.Prompt.Images {
 			url := DataURLOfImageFile(img)
 			if len(url) > 0 {
-				parts = append(parts, openai.ImagePart(url))
+				parts = append(parts, openai.ImageContentPart(openai.ChatCompletionContentPartImageImageURLParam{
+					URL: url,
+				}))
 			}
 		}
-		messages = append(messages, openai.UserMessageParts(parts...))
+		messages = append(messages, openai.UserMessage(parts))
 	}
 
-	messages, usage, err := llmToolCall(ctx, client, messages, conf, w)
+	messages, usage, err := llmToolCall(ctx, &client, messages, conf, w)
 	if err != nil {
 		return err
 	}
@@ -97,31 +99,29 @@ func llmToolCall(ctx context.Context, client *openai.Client, messages []openai.C
 
 		// let model to think whether to call tool
 		req := openai.ChatCompletionNewParams{
-			Model:    openai.F(conf.LLM.Model),
-			Messages: openai.F(messages),
+			Model:    conf.LLM.Model,
+			Messages: messages,
 		}
 		if conf.Prompt.MCPServers != nil && len(conf.Prompt.MCPServers.Tools) > 0 {
-			req.Tools = openai.F(conf.Prompt.MCPServers.Tools)
-			req.ToolChoice = openai.F(openai.ChatCompletionToolChoiceOptionUnionParam(openai.ChatCompletionToolChoiceOptionAutoAuto))
+			req.Tools = conf.Prompt.MCPServers.Tools
+			req.ToolChoice = openai.ChatCompletionToolChoiceOptionUnionParam{}
 		}
 
 		if conf.Prompt.WithUsage {
-			req.StreamOptions = openai.F(
-				openai.ChatCompletionStreamOptionsParam{
-					IncludeUsage: openai.F(true),
-				},
-			)
+			req.StreamOptions = openai.ChatCompletionStreamOptionsParam{
+				IncludeUsage: openai.Bool(true),
+			}
 		}
 
 		if conf.Prompt.JsonMode {
-			req.ResponseFormat = openai.F[openai.ChatCompletionNewParamsResponseFormatUnion](
-				openai.ResponseFormatJSONObjectParam{
-					Type: openai.F(openai.ResponseFormatJSONObjectTypeJSONObject),
+			req.ResponseFormat = openai.ChatCompletionNewParamsResponseFormatUnion{
+				OfJSONObject: &openai.ResponseFormatJSONObjectParam{
+					Type: "json_object",
 				},
-			)
+			}
 		}
 
-		req.Temperature = openai.F(conf.Prompt.Temperature)
+		req.Temperature = openai.Float(conf.Prompt.Temperature)
 
 		body, _ := req.MarshalJSON()
 		slog.Debug("Request", "body", string(body))
@@ -132,10 +132,10 @@ func llmToolCall(ctx context.Context, client *openai.Client, messages []openai.C
 		}
 
 		var usage openai.CompletionUsage
-		toolCalls := make(map[int64]*openai.ChatCompletionChunkChoicesDeltaToolCall)
+		toolCalls := make(map[int64]*openai.ChatCompletionChunkChoiceDeltaToolCall)
 		for s.Next() {
 			cur := s.Current()
-			slog.Debug("stream", "chunk", cur.JSON.RawJSON())
+			slog.Debug("stream", "chunk", cur.RawJSON())
 			for _, c := range cur.Choices {
 				w.Write([]byte(c.Delta.Content))
 				for _, toolCall := range c.Delta.ToolCalls {
@@ -173,24 +173,23 @@ func llmToolCall(ctx context.Context, client *openai.Client, messages []openai.C
 				return messages, totalUsage, err
 			}
 			assistantToolCalls = append(assistantToolCalls, openai.ChatCompletionMessageToolCallParam{
-				ID: openai.F(toolCall.ID),
-				Function: openai.F(openai.ChatCompletionMessageToolCallFunctionParam{
-					Name:      openai.F(toolCall.Function.Name),
-					Arguments: openai.F(toolCall.Function.Arguments),
-				}),
-				Type: openai.F(openai.ChatCompletionMessageToolCallTypeFunction),
+				ID: toolCall.ID,
+				Function: openai.ChatCompletionMessageToolCallFunctionParam{
+					Name:      toolCall.Function.Name,
+					Arguments: toolCall.Function.Arguments,
+				},
+				Type: "function",
 			})
 			toolCallMessages = append(toolCallMessages, toolResult)
 			slog.Info("Model call result ", "tool", toolCall.Function.Name, "result", toolResult)
 
 		}
 		assistantMessage := openai.ChatCompletionAssistantMessageParam{
-			Role:      openai.F(openai.ChatCompletionAssistantMessageParamRoleAssistant),
-			ToolCalls: openai.F(assistantToolCalls),
+			ToolCalls: assistantToolCalls,
 		}
 
 		// there are tool results
-		messages = append(messages, assistantMessage)
+		messages = append(messages, openai.ChatCompletionMessageParamUnion{OfAssistant: &assistantMessage})
 		messages = append(messages, toolCallMessages...)
 	}
 
