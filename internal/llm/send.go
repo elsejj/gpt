@@ -11,8 +11,8 @@ import (
 	"os"
 
 	"github.com/elsejj/gpt/internal/utils"
-	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/option"
+	"github.com/openai/openai-go/v2"
+	"github.com/openai/openai-go/v2/option"
 )
 
 func Chat(conf *utils.AppConf, w io.Writer) error {
@@ -164,7 +164,7 @@ func llmToolCall(ctx context.Context, client *openai.Client, messages []openai.C
 
 		w.Write([]byte("\n"))
 		toolCallMessages := make([]openai.ChatCompletionMessageParamUnion, 0)
-		assistantToolCalls := make([]openai.ChatCompletionMessageToolCallParam, 0)
+		assistantToolCalls := make([]openai.ChatCompletionMessageToolCallUnionParam, 0)
 		for _, toolCall := range toolCalls {
 			slog.Info("Model call ", "tool", toolCall.Function.Name, "args", toolCall.Function.Arguments)
 			toolResult, err := conf.Prompt.MCPServers.CallToolOpenAI(ctx, *toolCall)
@@ -172,13 +172,15 @@ func llmToolCall(ctx context.Context, client *openai.Client, messages []openai.C
 				slog.Error("Error calling tool", "tool", toolCall.Function.Name)
 				return messages, totalUsage, err
 			}
-			assistantToolCalls = append(assistantToolCalls, openai.ChatCompletionMessageToolCallParam{
-				ID: toolCall.ID,
-				Function: openai.ChatCompletionMessageToolCallFunctionParam{
-					Name:      toolCall.Function.Name,
-					Arguments: toolCall.Function.Arguments,
+			assistantToolCalls = append(assistantToolCalls, openai.ChatCompletionMessageToolCallUnionParam{
+				OfFunction: &openai.ChatCompletionMessageFunctionToolCallParam{
+					ID: toolCall.ID,
+					Function: openai.ChatCompletionMessageFunctionToolCallFunctionParam{
+						Name:      toolCall.Function.Name,
+						Arguments: toolCall.Function.Arguments,
+					},
+					Type: "function",
 				},
-				Type: "function",
 			})
 			toolCallMessages = append(toolCallMessages, toolResult)
 			slog.Info("Model call result ", "tool", toolCall.Function.Name, "result", toolResult)

@@ -7,21 +7,21 @@ import (
 	"log/slog"
 
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/shared"
+	"github.com/openai/openai-go/v2"
+	"github.com/openai/openai-go/v2/shared"
 )
 
 type MCPs struct {
 	toolToClient map[string]*McpClient
 	clients      []*McpClient
-	Tools        []openai.ChatCompletionToolParam
+	Tools        []openai.ChatCompletionToolUnionParam
 }
 
 func New(providers ...string) (*MCPs, error) {
 	mcps := &MCPs{
 		toolToClient: make(map[string]*McpClient),
 		clients:      make([]*McpClient, 0),
-		Tools:        make([]openai.ChatCompletionToolParam, 0),
+		Tools:        make([]openai.ChatCompletionToolUnionParam, 0),
 	}
 
 	for _, provider := range providers {
@@ -37,7 +37,7 @@ func New(providers ...string) (*MCPs, error) {
 	}
 
 	ctx := context.Background()
-	tools := make([]openai.ChatCompletionToolParam, 0)
+	tools := make([]openai.ChatCompletionToolUnionParam, 0)
 	for _, client := range mcps.clients {
 		_, err := client.client.Initialize(ctx, mcp.InitializeRequest{
 			Params: mcp.InitializeParams{
@@ -63,13 +63,11 @@ func New(providers ...string) (*MCPs, error) {
 				"required":   tool.InputSchema.Required,
 			}
 			description := tool.Description
-			tools = append(tools, openai.ChatCompletionToolParam{
-				Function: openai.FunctionDefinitionParam{
-					Name:        tool.Name,
-					Description: openai.String(description),
-					Parameters:  shared.FunctionParameters(params),
-				},
-			})
+			tools = append(tools, openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
+				Name:        tool.Name,
+				Description: openai.String(description),
+				Parameters:  shared.FunctionParameters(params),
+			}))
 		}
 	}
 	mcps.Tools = tools
