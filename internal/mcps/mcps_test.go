@@ -9,7 +9,7 @@ func TestStart(t *testing.T) {
 	//fileSystemProvider := "/home/jia/tools/mcp_servers/src/filesystem/index.ts /home/jia/tools/mcp_servers"
 
 	//fileSystemProvider := "/home/jia/temp/py_mcp/server.py"
-	fileSystemProvider := "http://127.0.0.1:8000/cnstock/sse"
+	fileSystemProvider := "http://127.0.0.1:30030/mcp"
 
 	s, err := New(fileSystemProvider)
 	if err != nil {
