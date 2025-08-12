@@ -39,7 +39,11 @@ func New(providers ...string) (*MCPs, error) {
 	ctx := context.Background()
 	tools := make([]openai.ChatCompletionToolParam, 0)
 	for _, client := range mcps.clients {
-		_, err := client.client.Initialize(ctx, mcp.InitializeRequest{})
+		_, err := client.client.Initialize(ctx, mcp.InitializeRequest{
+			Params: mcp.InitializeParams{
+				ProtocolVersion: "2025-03-26",
+			},
+		})
 		if err != nil {
 			slog.Warn("failed to initialize client", "provider", client.provider, "error", err)
 			mcps.Shutdown()
