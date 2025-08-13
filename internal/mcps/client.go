@@ -62,6 +62,7 @@ func NewRemoteClient(provider string) (*McpClient, error) {
 		slog.Error("Failed to start MCP client", "error", err)
 		return nil, err
 	}
+
 	return &McpClient{
 		client:   client,
 		provider: provider,

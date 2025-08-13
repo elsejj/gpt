@@ -64,6 +64,13 @@ Version: ` + appVersion,
 			os.Exit(0)
 		}
 
+		mcpServers, err := mcps.New(viper.GetStringSlice("mcp")...)
+		if err != nil {
+			slog.Error("Error creating mcp client", "err", err)
+			os.Exit(1)
+		}
+		defer mcpServers.Shutdown()
+
 		appConf.Prompt = &utils.Prompt{
 			System:        utils.UserPrompt(viper.GetStringSlice("system")),
 			Images:        viper.GetStringSlice("images"),
@@ -73,14 +80,8 @@ Version: ` + appVersion,
 			OverrideModel: viper.GetString("model"),
 			OnlyCodeBlock: viper.GetBool("code"),
 			Temperature:   viper.GetFloat64("temperature"),
+			MCPServers:    mcpServers,
 		}
-		mcpServers, err := mcps.New(viper.GetStringSlice("mcp")...)
-		if err != nil {
-			slog.Error("Error creating mcp client", "err", err)
-			os.Exit(1)
-		}
-		defer mcpServers.Shutdown()
-		appConf.Prompt.MCPServers = mcpServers
 
 		appConf.PickupModel()
 		var w io.Writer

@@ -69,6 +69,8 @@ func New(providers ...string) (*MCPs, error) {
 				Parameters:  shared.FunctionParameters(params),
 			}))
 		}
+
+		updateMcpPrompt(client.client)
 	}
 	mcps.Tools = tools
 

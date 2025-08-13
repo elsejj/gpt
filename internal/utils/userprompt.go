@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/elsejj/gpt/internal/mcps"
 )
 
 func UserPrompt(args []string) string {
@@ -22,10 +24,23 @@ func UserPrompt(args []string) string {
 		return false
 	}
 
+	tryMcpPrompt := func(promptName string) bool {
+		if body, ok := mcps.GetPrompt(promptName); ok {
+			buf.WriteString(body)
+			buf.WriteString(" ")
+			return true
+		}
+		return false
+	}
+
 	for _, arg := range args {
-		f1 := tryReadFile(arg)
-		f2 := tryReadFile(ConfigPath(arg))
-		if !f1 && !f2 {
+		f1 := tryMcpPrompt(arg)
+		if f1 {
+			continue
+		}
+		f2 := tryReadFile(arg)
+		f3 := tryReadFile(ConfigPath(arg))
+		if !f2 && !f3 {
 			buf.WriteString(arg)
 			buf.WriteString(" ")
 		}
