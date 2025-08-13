@@ -1,3 +1,7 @@
+# v0.2.6
+
+- 'openai' SDK upgrade to v2
+- 'mcp' prompt can be used by name, eg, if some MCP have a prompt named 'p1', now can refer it like `gpt -M "mcp_url" -s p1 user_prompt`
 
 # v0.2.5
 
