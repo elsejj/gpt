@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -138,6 +139,29 @@ func (p *ProxyMCPClient) ListToolsByPage(
 	return p.ListTools(ctx, request)
 }
 
+func asQSValue(v any) string {
+	if v == nil {
+		return ""
+	}
+	rv := reflect.ValueOf(v)
+	switch rv.Kind() {
+	case reflect.Slice, reflect.Array:
+		// special-case []byte -> string
+		if rv.Type().Elem().Kind() == reflect.Uint8 {
+			// []byte
+			return string(rv.Bytes())
+		}
+		parts := make([]string, 0, rv.Len())
+		for i := 0; i < rv.Len(); i++ {
+			elem := rv.Index(i).Interface()
+			parts = append(parts, fmt.Sprintf("%v", elem))
+		}
+		return strings.Join(parts, ",")
+	default:
+		return fmt.Sprintf("%v", v)
+	}
+}
+
 func toolRequest(tool *ToolDef, callRequest *mcp.CallToolRequest) (*http.Request, error) {
 
 	parsedURL, err := url.Parse(tool.URL)
@@ -152,7 +176,7 @@ func toolRequest(tool *ToolDef, callRequest *mcp.CallToolRequest) (*http.Request
 			qs.Set(callRequest.Params.Name, args)
 		case map[string]any:
 			for k, v := range args {
-				qs.Set(k, fmt.Sprintf("%v", v))
+				qs.Set(k, asQSValue(v))
 			}
 		default:
 			return nil, fmt.Errorf("unsupported argument type for GET request: %T", args)

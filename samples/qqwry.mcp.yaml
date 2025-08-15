@@ -8,5 +8,7 @@ tools:
       type: "object"
       properties:
         ip:
-          type: "string"
+          type: "array"
+          items:
+            type: "string"
           description: "IP address to query"
