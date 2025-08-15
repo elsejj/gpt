@@ -8,10 +8,11 @@ func TestStart(t *testing.T) {
 
 	//fileSystemProvider := "/home/jia/tools/mcp_servers/src/filesystem/index.ts /home/jia/tools/mcp_servers"
 
-	//fileSystemProvider := "/home/jia/temp/py_mcp/server.py"
-	fileSystemProvider := "http://127.0.0.1:30030/mcp"
+	//scriptProvider := "/home/jia/temp/py_mcp/server.py"
+	// streamHttpProvider := "http://127.0.0.1:30030/mcp"
+	proxyProvider := "/home/jia/repo/gpt-cli/internal/mcps/qqwry.mcp.yaml"
 
-	s, err := New(fileSystemProvider)
+	s, err := New(proxyProvider)
 	if err != nil {
 		t.Fatal(err)
 	}

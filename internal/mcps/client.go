@@ -29,6 +29,18 @@ func NewClient(provider string) (*McpClient, error) {
 }
 
 func NewLocalClient(provider string) (*McpClient, error) {
+
+	if IsProxyMCPConfig(provider) {
+		client, err := NewProxyMCPClient(provider)
+		if err != nil {
+			return nil, err
+		}
+		return &McpClient{
+			client:   client,
+			provider: provider,
+		}, nil
+	}
+
 	exeName, args := buildExecutable(provider)
 
 	client, err := mcpc.NewStdioMCPClient(exeName, []string{}, args...)

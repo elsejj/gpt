@@ -1,0 +1,12 @@
+tools:
+  # https://github.com/elsejj/qqwry
+  - name: "qqwry"
+    description: "Get IP country, region, city and ISP information"
+    url: "http://127.0.0.1:11223"
+    method: "GET"
+    inputSchema:
+      type: "object"
+      properties:
+        ip:
+          type: "string"
+          description: "IP address to query"

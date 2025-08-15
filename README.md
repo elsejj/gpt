@@ -75,8 +75,13 @@ There are two kinds of mcp server:
     - `.sh` `.bash` `.ps1` will be run as shell script.
     - any other executable file.
 
-- Remote mcp server, communicate with HTTP SSE
+- Remote mcp server, communicate with HTTP sse or HTTP stream
+
   - `-M` flag will be used to specify the mcp server url, and the request will be sent to the url.
+
+- Proxy http service as mcp
+
+  For some existing HTTP services, they can be used as MCP services by writing an MCP configuration. see [samples/qqwry.mcp.yaml](samples/qqwry.mcp.yaml), it's proxy a IP information HTTP service as MCP, eg. `gpt -M samples/qqwry.mcp.yaml "where is 120.197.169.198's location"`
 
 # Installation
 

@@ -1,3 +1,7 @@
+# v0.2.7
+
+- for any http service, a `ProxyMCPClient` can be used to visit as a mcp server, eg. `gpt -M samples/qqwry.mcp.yaml "where is 120.197.169.198's location"`
+
 # v0.2.6
 
 - 'openai' SDK upgrade to v2
