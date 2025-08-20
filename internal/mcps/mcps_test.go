@@ -10,7 +10,7 @@ func TestStart(t *testing.T) {
 
 	//scriptProvider := "/home/jia/temp/py_mcp/server.py"
 	// streamHttpProvider := "http://127.0.0.1:30030/mcp"
-	proxyProvider := "/home/jia/repo/gpt-cli/internal/mcps/qqwry.mcp.yaml"
+	proxyProvider := "/home/jia/repo/gpt-cli/samples/qqwry.openapi.yaml"
 
 	s, err := New(proxyProvider)
 	if err != nil {

@@ -9,6 +9,7 @@ paths:
   /:
     get:
       summary: 查询 IP 地址
+      name: IP信息查询
       parameters:
         - name: ip
           in: query
