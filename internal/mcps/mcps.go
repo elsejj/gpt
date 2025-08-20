@@ -11,12 +11,16 @@ import (
 	"github.com/openai/openai-go/v2/shared"
 )
 
+// MCPs is a collection of MCP clients.
+// It manages the lifecycle of the clients and provides a single entry point for calling tools.
 type MCPs struct {
 	toolToClient map[string]*McpClient
 	clients      []*McpClient
 	Tools        []openai.ChatCompletionToolUnionParam
 }
 
+// New creates a new MCPs instance.
+// It initializes the clients and lists the available tools.
 func New(providers ...string) (*MCPs, error) {
 	mcps := &MCPs{
 		toolToClient: make(map[string]*McpClient),
@@ -77,6 +81,7 @@ func New(providers ...string) (*MCPs, error) {
 	return mcps, nil
 }
 
+// Shutdown closes all the MCP clients.
 func (m *MCPs) Shutdown() {
 	for _, client := range m.clients {
 		client.client.Close()
@@ -84,6 +89,8 @@ func (m *MCPs) Shutdown() {
 	m.clients = nil
 	m.toolToClient = nil
 }
+// CallToolOpenAI calls a tool with the given name and arguments.
+// It is a wrapper around CallTool that takes an openai.ChatCompletionChunkChoiceDeltaToolCall.
 func (m *MCPs) CallToolOpenAI(ctx context.Context, toolCall openai.ChatCompletionChunkChoiceDeltaToolCall) (openai.ChatCompletionMessageParamUnion, error) {
 	toolName := toolCall.Function.Name
 	callID := toolCall.ID
@@ -97,6 +104,8 @@ func (m *MCPs) CallToolOpenAI(ctx context.Context, toolCall openai.ChatCompletio
 	return m.CallTool(ctx, callID, toolName, args)
 }
 
+// CallTool calls a tool with the given name and arguments.
+// It returns the result of the tool call as a ChatCompletionMessageParamUnion.
 func (m *MCPs) CallTool(ctx context.Context, callID string, toolName string, args map[string]any) (openai.ChatCompletionMessageParamUnion, error) {
 
 	client, ok := m.toolToClient[toolName]

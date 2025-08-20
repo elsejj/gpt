@@ -24,6 +24,7 @@ var cfgFile string
 var appVersion string
 
 // rootCmd represents the base command when called without any subcommands
+// It is the entry point for the CLI application.
 var rootCmd = &cobra.Command{
 	Use:   "gpt",
 	Short: "a cli tool for gpt.\n version: " + appVersion,
@@ -105,6 +106,7 @@ Version: ` + appVersion,
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
+// The function will exit the application if any error occurs.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -113,6 +115,7 @@ func Execute() {
 }
 
 func init() {
+	// cobra.OnInitialize is a callback function that is called after the command is initialized.
 	cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.
@@ -138,6 +141,7 @@ func init() {
 }
 
 // initConfig reads in config file and ENV variables if set.
+// It also sets up the viper configuration.
 func initConfig() {
 	if cfgFile != "" {
 		// Use config file from the flag.

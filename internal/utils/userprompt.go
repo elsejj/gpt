@@ -10,6 +10,8 @@ import (
 	"github.com/elsejj/gpt/internal/mcps"
 )
 
+// UserPrompt processes the user's prompt.
+// It reads files, gets MCP prompts, and replaces variables.
 func UserPrompt(args []string) string {
 
 	var buf strings.Builder
@@ -82,6 +84,7 @@ var globalVariables = map[string]string{
 	"SHELL": shellName(),
 }
 
+// shellName returns the name of the current shell.
 func shellName() string {
 	if runtime.GOOS == "windows" {
 		return "powershell"
@@ -89,6 +92,8 @@ func shellName() string {
 	return "bash"
 }
 
+// getVariableValue gets the value of a variable.
+// It supports global variables like OS, TODAY, and SHELL.
 func getVariableValue(varName string) (string, bool) {
 	if val, ok := globalVariables[strings.ToUpper(varName)]; ok {
 		return val, true

@@ -6,6 +6,7 @@ import (
 	"github.com/elsejj/gpt/internal/mcps"
 )
 
+// LLM defines the configuration for a large language model.
 type LLM struct {
 	Gateway  string `yaml:"gateway,omitempty" json:"gateway,omitempty"`
 	ApiKey   string `yaml:"apiKey,omitempty" json:"apiKey,omitempty"`
@@ -13,6 +14,7 @@ type LLM struct {
 	Model    string `yaml:"model" json:"model"`
 }
 
+// Prompt defines the structure of a user prompt.
 type Prompt struct {
 	System        string
 	Images        []string
@@ -25,12 +27,14 @@ type Prompt struct {
 	MCPServers    *mcps.MCPs
 }
 
+// AppConf defines the application's configuration.
 type AppConf struct {
 	LLM    LLM            `yaml:"llm" json:"llm"`
 	LLMs   map[string]LLM `yaml:"llms,omitempty" json:"llms,omitempty"`
 	Prompt *Prompt
 }
 
+// PickupModel overrides the default model with the one provided by the user.
 func (c *AppConf) PickupModel() {
 	if c.Prompt.OverrideModel != "" {
 		model, provider, _ := strings.Cut(c.Prompt.OverrideModel, ":")

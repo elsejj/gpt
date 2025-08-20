@@ -15,6 +15,8 @@ import (
 	"github.com/openai/openai-go/v2/option"
 )
 
+// Chat sends the user's prompt to the LLM and writes the response to the provided writer.
+// It also handles tool calls and image data.
 func Chat(conf *utils.AppConf, w io.Writer) error {
 	if conf == nil || conf.Prompt == nil {
 		return fmt.Errorf("config or prompt is nil")
@@ -63,6 +65,7 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 	return nil
 }
 
+// DataURLOfImageFile reads an image file and returns a data URL.
 func DataURLOfImageFile(filePath string) string {
 	body, err := os.ReadFile(filePath)
 	if err != nil {
@@ -73,6 +76,8 @@ func DataURLOfImageFile(filePath string) string {
 	return fmt.Sprintf("data:%s;base64,%s", mimeType, base64Body)
 }
 
+// ExtractCodeBlock extracts the first code block from the given text.
+// It returns the code block without the backticks.
 func ExtractCodeBlock(text []byte) []byte {
 	codeStart := bytes.Index(text, []byte("```"))
 	if codeStart < 0 {
@@ -93,6 +98,9 @@ func ExtractCodeBlock(text []byte) []byte {
 	return text[codeStart : codeStart+codeEnd]
 }
 
+// llmToolCall handles the tool calling logic.
+// It sends the request to the LLM, and if the LLM returns a tool call, it executes the tool and sends the result back to the LLM.
+// It returns the final messages, the total usage, and any error that occurred.
 func llmToolCall(ctx context.Context, client *openai.Client, messages []openai.ChatCompletionMessageParamUnion, conf *utils.AppConf, w io.Writer) ([]openai.ChatCompletionMessageParamUnion, openai.CompletionUsage, error) {
 	var totalUsage openai.CompletionUsage
 	for {

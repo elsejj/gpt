@@ -17,12 +17,14 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
+// PromptDef defines the structure of a prompt in the proxy configuration.
 type PromptDef struct {
 	Name        string              `json:"name" yaml:"name"`
 	Description string              `json:"description" yaml:"description"`
 	Messages    []mcp.PromptMessage `json:"messages" yaml:"messages"`
 }
 
+// ToolDef defines the structure of a tool in the proxy configuration.
 type ToolDef struct {
 	Name        string              `json:"name" yaml:"name"`
 	URL         string              `json:"url" yaml:"url"`
@@ -31,14 +33,14 @@ type ToolDef struct {
 	InputSchema mcp.ToolInputSchema `json:"inputSchema,omitempty" yaml:"inputSchema,omitempty"`
 }
 
-// ProxyMCPClient 实现了 MCPClient 接口，将 HTTP 服务代理为 MCP 服务
+// ProxyMCPClient implements the MCPClient interface and proxies HTTP services as MCP services.
 type ProxyMCPClient struct {
 	Tools      []ToolDef    `json:"tools" yaml:"tools"`
 	Prompts    []PromptDef  `json:"prompts" yaml:"prompts"`
 	httpClient *http.Client `json:"-" yaml:"-"`
 }
 
-// NewProxyMCPClient 从配置文件创建一个新的 ProxyMCPClient
+// NewProxyMCPClient creates a new ProxyMCPClient from a configuration file.
 func NewProxyMCPClient(configPath string) (*ProxyMCPClient, error) {
 
 	client, err := loadClientConfig(configPath)
@@ -51,6 +53,7 @@ func NewProxyMCPClient(configPath string) (*ProxyMCPClient, error) {
 	return client, nil
 }
 
+// IsProxyMCPConfig checks if the given name is a proxy MCP configuration file.
 func IsProxyMCPConfig(name string) bool {
 	if !strings.HasSuffix(name, "mcp.json") && !strings.HasSuffix(name, "mcp.yaml") {
 		return false
@@ -63,7 +66,7 @@ func IsProxyMCPConfig(name string) bool {
 	return !info.IsDir()
 }
 
-// loadClientConfig 从文件加载配置
+// loadClientConfig loads the configuration from a file.
 func loadClientConfig(configPath string) (*ProxyMCPClient, error) {
 
 	data, err := os.ReadFile(configPath)
@@ -90,7 +93,7 @@ func loadClientConfig(configPath string) (*ProxyMCPClient, error) {
 	return &config, nil
 }
 
-// Initialize 实现 MCPClient.Initialize
+// Initialize implements the MCPClient.Initialize method.
 func (p *ProxyMCPClient) Initialize(
 	ctx context.Context,
 	request mcp.InitializeRequest,
@@ -105,13 +108,13 @@ func (p *ProxyMCPClient) Initialize(
 	}, nil
 }
 
-// Ping 实现 MCPClient.Ping
+// Ping implements the MCPClient.Ping method.
 func (p *ProxyMCPClient) Ping(ctx context.Context) error {
 	// 对于代理客户端，ping 总是成功的
 	return nil
 }
 
-// ListTools 实现 MCPClient.ListTools
+// ListTools implements the MCPClient.ListTools method.
 func (p *ProxyMCPClient) ListTools(
 	ctx context.Context,
 	request mcp.ListToolsRequest,
@@ -131,7 +134,7 @@ func (p *ProxyMCPClient) ListTools(
 	}, nil
 }
 
-// ListToolsByPage 实现 MCPClient.ListToolsByPage
+// ListToolsByPage implements the MCPClient.ListToolsByPage method.
 func (p *ProxyMCPClient) ListToolsByPage(
 	ctx context.Context,
 	request mcp.ListToolsRequest,
@@ -196,7 +199,7 @@ func toolRequest(tool *ToolDef, callRequest *mcp.CallToolRequest) (*http.Request
 	}, nil
 }
 
-// CallTool 实现 MCPClient.CallTool
+// CallTool implements the MCPClient.CallTool method.
 func (p *ProxyMCPClient) CallTool(
 	ctx context.Context,
 	request mcp.CallToolRequest,
@@ -256,7 +259,7 @@ func (p *ProxyMCPClient) CallTool(
 	}, nil
 }
 
-// ListPrompts 实现 MCPClient.ListPrompts
+// ListPrompts implements the MCPClient.ListPrompts method.
 func (p *ProxyMCPClient) ListPrompts(
 	ctx context.Context,
 	request mcp.ListPromptsRequest,
@@ -276,7 +279,7 @@ func (p *ProxyMCPClient) ListPrompts(
 	}, nil
 }
 
-// ListPromptsByPage 实现 MCPClient.ListPromptsByPage
+// ListPromptsByPage implements the MCPClient.ListPromptsByPage method.
 func (p *ProxyMCPClient) ListPromptsByPage(
 	ctx context.Context,
 	request mcp.ListPromptsRequest,
@@ -284,7 +287,7 @@ func (p *ProxyMCPClient) ListPromptsByPage(
 	return p.ListPrompts(ctx, request)
 }
 
-// GetPrompt 实现 MCPClient.GetPrompt
+// GetPrompt implements the MCPClient.GetPrompt method.
 func (p *ProxyMCPClient) GetPrompt(
 	ctx context.Context,
 	request mcp.GetPromptRequest,
@@ -308,7 +311,7 @@ func (p *ProxyMCPClient) GetPrompt(
 	}, nil
 }
 
-// ListResources 实现 MCPClient.ListResources
+// ListResources implements the MCPClient.ListResources method.
 func (p *ProxyMCPClient) ListResources(
 	ctx context.Context,
 	request mcp.ListResourcesRequest,
@@ -316,7 +319,7 @@ func (p *ProxyMCPClient) ListResources(
 	return nil, fmt.Errorf("resource listing not implemented for proxy client")
 }
 
-// ListResourcesByPage 实现 MCPClient.ListResourcesByPage
+// ListResourcesByPage implements the MCPClient.ListResourcesByPage method.
 func (p *ProxyMCPClient) ListResourcesByPage(
 	ctx context.Context,
 	request mcp.ListResourcesRequest,
@@ -324,7 +327,7 @@ func (p *ProxyMCPClient) ListResourcesByPage(
 	return p.ListResources(ctx, request)
 }
 
-// ListResourceTemplates 实现 MCPClient.ListResourceTemplates
+// ListResourceTemplates implements the MCPClient.ListResourceTemplates method.
 func (p *ProxyMCPClient) ListResourceTemplates(
 	ctx context.Context,
 	request mcp.ListResourceTemplatesRequest,
@@ -332,7 +335,7 @@ func (p *ProxyMCPClient) ListResourceTemplates(
 	return nil, fmt.Errorf("resource templates not implemented for proxy client")
 }
 
-// ListResourceTemplatesByPage 实现 MCPClient.ListResourceTemplatesByPage
+// ListResourceTemplatesByPage implements the MCPClient.ListResourceTemplatesByPage method.
 func (p *ProxyMCPClient) ListResourceTemplatesByPage(
 	ctx context.Context,
 	request mcp.ListResourceTemplatesRequest,
@@ -340,7 +343,7 @@ func (p *ProxyMCPClient) ListResourceTemplatesByPage(
 	return p.ListResourceTemplates(ctx, request)
 }
 
-// ReadResource 实现 MCPClient.ReadResource
+// ReadResource implements the MCPClient.ReadResource method.
 func (p *ProxyMCPClient) ReadResource(
 	ctx context.Context,
 	request mcp.ReadResourceRequest,
@@ -348,25 +351,25 @@ func (p *ProxyMCPClient) ReadResource(
 	return nil, fmt.Errorf("resource reading not implemented for proxy client")
 }
 
-// Subscribe 实现 MCPClient.Subscribe
+// Subscribe implements the MCPClient.Subscribe method.
 func (p *ProxyMCPClient) Subscribe(ctx context.Context, request mcp.SubscribeRequest) error {
 	// 代理客户端不支持订阅
 	return fmt.Errorf("subscription not supported by proxy client")
 }
 
-// Unsubscribe 实现 MCPClient.Unsubscribe
+// Unsubscribe implements the MCPClient.Unsubscribe method.
 func (p *ProxyMCPClient) Unsubscribe(ctx context.Context, request mcp.UnsubscribeRequest) error {
 	// 代理客户端不支持订阅
 	return fmt.Errorf("subscription not supported by proxy client")
 }
 
-// SetLevel 实现 MCPClient.SetLevel
+// SetLevel implements the MCPClient.SetLevel method.
 func (p *ProxyMCPClient) SetLevel(ctx context.Context, request mcp.SetLevelRequest) error {
 	// 代理客户端忽略日志级别设置
 	return nil
 }
 
-// Complete 实现 MCPClient.Complete
+// Complete implements the MCPClient.Complete method.
 func (p *ProxyMCPClient) Complete(
 	ctx context.Context,
 	request mcp.CompleteRequest,
@@ -375,12 +378,12 @@ func (p *ProxyMCPClient) Complete(
 	return nil, fmt.Errorf("completion not supported by proxy client")
 }
 
-// Close 实现 MCPClient.Close
+// Close implements the MCPClient.Close method.
 func (p *ProxyMCPClient) Close() error {
 	// 清理资源
 	return nil
 }
 
-// OnNotification 实现 MCPClient.OnNotification
+// OnNotification implements the MCPClient.OnNotification method.
 func (p *ProxyMCPClient) OnNotification(handler func(notification mcp.JSONRPCNotification)) {
 }

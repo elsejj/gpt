@@ -12,6 +12,7 @@ import (
 
 var mcpPrompts = sync.Map{}
 
+// GetPrompt gets the prompt with the given name.
 func GetPrompt(name string) (string, bool) {
 	value, ok := mcpPrompts.Load(name)
 	if !ok {
@@ -20,6 +21,7 @@ func GetPrompt(name string) (string, bool) {
 	return value.(string), true
 }
 
+// updateMcpPrompt updates the MCP prompts from the given client.
 func updateMcpPrompt(client mcpc.MCPClient) {
 	ctx := context.Background()
 	lists, err := client.ListPrompts(ctx, mcp.ListPromptsRequest{})

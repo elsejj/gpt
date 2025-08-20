@@ -11,6 +11,8 @@ import (
 	mcpc "github.com/mark3labs/mcp-go/client"
 )
 
+// McpClient is a wrapper around the mcpc.MCPClient.
+// It holds the client and the provider string.
 type McpClient struct {
 	client   mcpc.MCPClient
 	provider string
@@ -20,6 +22,8 @@ func isLocal(provider string) bool {
 	return !strings.HasPrefix(provider, "http")
 }
 
+// NewClient creates a new McpClient based on the provider string.
+// It can create either a local or a remote client.
 func NewClient(provider string) (*McpClient, error) {
 	if isLocal(provider) {
 		return NewLocalClient(provider)
@@ -28,6 +32,8 @@ func NewClient(provider string) (*McpClient, error) {
 	}
 }
 
+// NewLocalClient creates a new local McpClient.
+// It can be either a proxy client or a stdio client.
 func NewLocalClient(provider string) (*McpClient, error) {
 
 	if IsProxyMCPConfig(provider) {
@@ -53,6 +59,8 @@ func NewLocalClient(provider string) (*McpClient, error) {
 	}, nil
 }
 
+// NewRemoteClient creates a new remote McpClient.
+// It can be either a http client or a sse client.
 func NewRemoteClient(provider string) (*McpClient, error) {
 	var client *mcpc.Client
 	var err error
@@ -81,6 +89,8 @@ func NewRemoteClient(provider string) (*McpClient, error) {
 	}, nil
 }
 
+// buildExecutable builds the executable and arguments for a local MCP client.
+// It supports python, javascript, typescript, go and shell scripts.
 func buildExecutable(provider string) (string, []string) {
 	cmds := strings.Split(provider, " ")
 	ext := path.Ext(cmds[0])

@@ -9,6 +9,8 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+// ConfigPath returns the path to the configuration file.
+// It is located in the user's home directory.
 func ConfigPath(fileName ...string) string {
 
 	isWindows := runtime.GOOS == "windows"
@@ -25,6 +27,7 @@ func ConfigPath(fileName ...string) string {
 	}
 }
 
+// InitConfig initializes the configuration file if it does not exist.
 func InitConfig(fileName string) error {
 	if fileName == "" {
 		fileName = ConfigPath("config.yaml")
@@ -78,6 +81,7 @@ func InitConfig(fileName string) error {
 	return nil
 }
 
+// LoadConfig loads the configuration from the given file.
 func LoadConfig(fileName string) (*AppConf, error) {
 	if fileName == "" {
 		fileName = ConfigPath("config.yaml")
