@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: qqwry
+  description: IP 地址查询服务
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:11223
+paths:
+  /:
+    get:
+      summary: 查询 IP 地址
+      parameters:
+        - name: ip
+          in: query
+          description: IP 地址
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResult'
+components:
+  schemas:
+    SearchResult:
+      type: object
+      properties:
+        ip:
+          type: string
+          description: IP 地址
+        country:
+          type: string
+          description: 国家
+        area:
+          type: string
+          description: 区域

@@ -47,6 +47,17 @@ func NewLocalClient(provider string) (*McpClient, error) {
 		}, nil
 	}
 
+	if IsOpenAPIProxyConfig(provider) {
+		client, err := NewOpenApiMcpClient(provider)
+		if err != nil {
+			return nil, err
+		}
+		return &McpClient{
+			client:   client,
+			provider: provider,
+		}, nil
+	}
+
 	exeName, args := buildExecutable(provider)
 
 	client, err := mcpc.NewStdioMCPClient(exeName, []string{}, args...)

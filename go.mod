@@ -1,6 +1,6 @@
 module github.com/elsejj/gpt
 
-go 1.23.4
+go 1.24.0
 
 require (
 	github.com/goccy/go-yaml v1.18.0
@@ -19,9 +19,12 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/invopop/jsonschema v0.13.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/pb33f/libopenapi v0.25.3 // indirect
+	github.com/pb33f/ordered-map/v2 v2.2.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/sagikazarmark/locafero v0.9.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
+	github.com/speakeasy-api/jsonpath v0.6.2 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.9.2 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
