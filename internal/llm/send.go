@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -13,7 +14,29 @@ import (
 	"github.com/elsejj/gpt/internal/utils"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
+	"github.com/spf13/viper"
 )
+
+func debugChunk(c string) {
+	var verbose = viper.GetInt("verbose")
+	if verbose >= 3 {
+		// detailed debug info
+		slog.Debug("stream chunk", "chunk", c)
+	} else if verbose >= 2 {
+		// only log reason content
+		var chunk map[string]any
+		err := json.Unmarshal([]byte(c), &chunk)
+		if err != nil {
+			slog.Debug("stream chunk", "chunk", c)
+			return
+		}
+		reasonContent := MGet(chunk, "choices.0.delta.reasoning_content", "")
+		if len(reasonContent) > 0 {
+			fmt.Printf("\033[37m%s\033[0m", reasonContent)
+		}
+	}
+
+}
 
 // Chat sends the user's prompt to the LLM and writes the response to the provided writer.
 // It also handles tool calls and image data.
@@ -143,7 +166,7 @@ func llmToolCall(ctx context.Context, client *openai.Client, messages []openai.C
 		toolCalls := make(map[int64]*openai.ChatCompletionChunkChoiceDeltaToolCall)
 		for s.Next() {
 			cur := s.Current()
-			slog.Debug("stream", "chunk", cur.RawJSON())
+			debugChunk(cur.RawJSON())
 			for _, c := range cur.Choices {
 				w.Write([]byte(c.Delta.Content))
 				for _, toolCall := range c.Delta.ToolCalls {

@@ -89,6 +89,7 @@ func (m *MCPs) Shutdown() {
 	m.clients = nil
 	m.toolToClient = nil
 }
+
 // CallToolOpenAI calls a tool with the given name and arguments.
 // It is a wrapper around CallTool that takes an openai.ChatCompletionChunkChoiceDeltaToolCall.
 func (m *MCPs) CallToolOpenAI(ctx context.Context, toolCall openai.ChatCompletionChunkChoiceDeltaToolCall) (openai.ChatCompletionMessageParamUnion, error) {

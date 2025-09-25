@@ -132,7 +132,7 @@ func init() {
 	rootCmd.Flags().BoolP("usage", "u", false, "Show usage")
 	rootCmd.Flags().BoolP("json", "j", false, "force output in json format")
 	rootCmd.Flags().BoolP("version", "V", false, "Show version")
-	rootCmd.Flags().IntP("verbose", "v", 0, "Verbose level, 0-2, default 0, 0 is no verbose")
+	rootCmd.Flags().IntP("verbose", "v", 0, "Verbose level, 0-3, default 0, 0 is no verbose")
 	rootCmd.Flags().StringP("model", "m", "", "Model override default model, with format 'model[:provider]'")
 	rootCmd.Flags().BoolP("code", "c", false, "extract first code block if exists, useful for pipe code generation to next command")
 	rootCmd.Flags().StringArrayP("mcp", "M", []string{}, "model context provider to be used, can be a file path(stdio) or a url(sse)")
