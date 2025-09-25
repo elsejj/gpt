@@ -1,3 +1,7 @@
+# v0.2.8
+
+- verbose 2 will output reason content, verbose 3 will output raw chunk response
+
 # v0.2.7
 
 - for any http service, a `ProxyMCPClient` can be used to visit as a mcp server, eg. `gpt -M samples/qqwry.mcp.yaml "where is 120.197.169.198's location"`
