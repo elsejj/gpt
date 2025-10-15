@@ -9,15 +9,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
         with:
-          go-version-file: "go.mod"
+          go-version: ">=1.24"
 
       - name: Build
         run: make all
+
+      - name: Get Changelog Entry
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          validation_level: warn
+          version: ${{ steps.tag_name.outputs.current_version }}
+          path: ./CHANGELOG.md
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -28,3 +36,5 @@ jobs:
             dist/linux/gpt-linux-amd64.tar.gz 
             dist/mac/gpt-darwin-arm64.tar.gz
             dist/win/gpt-windows-amd64.zip
+          body: ${{ steps.changelog_reader.outputs.changes}}
+          make_latest: true
