@@ -12,7 +12,7 @@
 - `cmd`: 这个包是 cli 入口, 它使用 [Cobra: A Commander for modern Go CLI interactions](https://pkg.go.dev/github.com/spf13/cobra) 作为框架
   - `cmd/root.go`: 应用的入口, 请阅读其中的命令行参数生成部分了解可以使用的参数.
 - `internal`: 这是一些内部使用的包
-  - `internal/llm`: 对 [OpenAI Go SDK](https://pkg.go.dev/github.com/openai/openai-go/v2) 的封装以发送/接收 LLM 请求, 处理 MCP 调用等
+  - `internal/llm`: 对 [OpenAI Go SDK](https://pkg.go.dev/github.com/openai/openai-go/v3) 的封装以发送/接收 LLM 请求, 处理 MCP 调用等
   - `internal/mcps`: 将多个 MCP 服务, 聚合一个, 供大模型使用
   - `internal/utils`: 一些工具函数
 
