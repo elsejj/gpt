@@ -12,8 +12,8 @@ import (
 	"os"
 
 	"github.com/elsejj/gpt/internal/utils"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/option"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 	"github.com/spf13/viper"
 )
 
