@@ -41,13 +41,16 @@ func mGet(d reflect.Value, key string) (reflect.Value, bool) {
 	switch d.Kind() {
 	case reflect.Map:
 		v := d.MapIndex(reflect.ValueOf(key))
+		if !v.IsValid() {
+			return zeroValue, false
+		}
 		if v.Kind() == reflect.Interface {
+			if v.IsNil() {
+				return zeroValue, false
+			}
 			v = v.Elem()
 		}
-		if v.IsValid() {
-			return v, true
-		}
-		return zeroValue, false
+		return v, true
 	case reflect.Slice:
 		idx, err := strconv.Atoi(key)
 		if err != nil {
