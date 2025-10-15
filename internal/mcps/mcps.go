@@ -7,8 +7,8 @@ import (
 	"log/slog"
 
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/openai/openai-go/v2"
-	"github.com/openai/openai-go/v2/shared"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/shared"
 )
 
 // MCPs is a collection of MCP clients.

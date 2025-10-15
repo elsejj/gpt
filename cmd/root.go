@@ -27,11 +27,12 @@ var appVersion string
 // It is the entry point for the CLI application.
 var rootCmd = &cobra.Command{
 	Use:   "gpt",
-	Short: "a cli tool for gpt.\n version: " + appVersion,
+	Short: "a cli tool for gpt.\n version: v" + appVersion,
 	Long: `gpt is a cli tool for gpt. 
 It send prompt from user input, file to gpt compatible api and get response back.
 
-Version: ` + appVersion,
+Version: v` + appVersion,
+	Version: "v" + appVersion,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {

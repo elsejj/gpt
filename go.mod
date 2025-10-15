@@ -5,7 +5,7 @@ go 1.24.7
 require (
 	github.com/goccy/go-yaml v1.18.0
 	github.com/mark3labs/mcp-go v0.40.0
-	github.com/openai/openai-go/v2 v2.6.0
+	github.com/openai/openai-go/v3 v3.3.0
 	github.com/pb33f/libopenapi v0.27.2
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
