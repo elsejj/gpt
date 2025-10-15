@@ -1,42 +1,49 @@
-# v0.2.8
+# Changelog
+All notable changes to this project will be documented in this file.
 
-- verbose 2 will output reason content, verbose 3 will output raw chunk response
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# v0.2.7
+## [Unreleased]
 
-- for any http service, a `ProxyMCPClient` can be used to visit as a mcp server, eg. `gpt -M samples/qqwry.mcp.yaml "where is 120.197.169.198's location"`
+## [0.2.8]
+### Changed
+- Verbose level 2 now outputs reason content, and verbose level 3 outputs the raw chunk response.
 
-# v0.2.6
-
-- 'openai' SDK upgrade to v2
-- 'mcp' prompt can be used by name, eg, if some MCP have a prompt named 'p1', now can refer it like `gpt -M "mcp_url" -s p1 user_prompt`
-
-# v0.2.5
-
-- `openai` SDK upgrade to v1
-- `mcp` support stream http transport, will be indicated by URL don't have `sse` in it.
-
-## v0.2.4
-
-- enable multiple round 'mcp' call
-
-## v0.2.3
-
-- more compatible
-- support only model name
-
-## v0.2.2
-
-- more compatible with `mcp` server
-
-## v0.2.1
-
-### Fixed
-
-- Fix `mcp` sse, it should `Start` before to use.
-
-## v0.2.0
-
+## [0.2.7]
 ### Added
+- Allow using a `ProxyMCPClient` to expose any HTTP service as an MCP server, for example `gpt -M samples/qqwry.mcp.yaml "where is 120.197.169.198's location"`.
 
-- Added support for `Model Content Protocol`(mcp), the `gpt` now can be passed `-M` option to specify the mcp server.
+## [0.2.6]
+### Changed
+- Upgraded the `openai` SDK to v2.
+### Added
+- Allow referencing MCP prompts by name, for example `gpt -M "mcp_url" -s p1 user_prompt`.
+
+## [0.2.5]
+### Changed
+- Upgraded the `openai` SDK to v1.
+### Added
+- Added streaming HTTP transport support for MCP, indicated by URLs without `sse`.
+
+## [0.2.4]
+### Added
+- Enabled multi-round MCP calls.
+
+## [0.2.3]
+### Changed
+- Improved compatibility.
+### Added
+- Support specifying only the model name.
+
+## [0.2.2]
+### Changed
+- Improved compatibility with MCP servers.
+
+## [0.2.1]
+### Fixed
+- Fixed MCP SSE so it starts before use.
+
+## [0.2.0]
+### Added
+- Added support for the Model Content Protocol (MCP); `gpt` now accepts the `-M` option to specify the MCP server.
