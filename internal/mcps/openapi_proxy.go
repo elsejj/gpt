@@ -35,9 +35,9 @@ func NewOpenApiMcpClient(configPath string) (*OpenApiMcpClient, error) {
 		return nil, fmt.Errorf("failed to parse openapi spec: %w", err)
 	}
 
-	model, errs := doc.BuildV3Model()
-	if len(errs) > 0 {
-		return nil, fmt.Errorf("failed to build v3 model: %v", errs)
+	model, err := doc.BuildV3Model()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build v3 model: %v", err)
 	}
 
 	return &OpenApiMcpClient{
