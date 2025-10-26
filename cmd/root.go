@@ -135,6 +135,7 @@ func init() {
 	rootCmd.Flags().BoolP("version", "V", false, "Show version")
 	rootCmd.Flags().IntP("verbose", "v", 0, "Verbose level, 0-3, default 0, 0 is no verbose")
 	rootCmd.Flags().StringP("model", "m", "", "Model override default model, with format 'model[:provider]'")
+	rootCmd.Flags().StringP("reason", "r", "", "Reasoning effort to used, can be one of [1, minimal, 2, low, 3, medium, 4, high, 0, none]")
 	rootCmd.Flags().BoolP("code", "c", false, "extract first code block if exists, useful for pipe code generation to next command")
 	rootCmd.Flags().StringArrayP("mcp", "M", []string{}, "model context provider to be used, can be a file path(stdio) or a url(sse)")
 

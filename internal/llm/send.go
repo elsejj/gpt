@@ -14,6 +14,7 @@ import (
 	"github.com/elsejj/gpt/internal/utils"
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
+	"github.com/openai/openai-go/v3/shared"
 	"github.com/spf13/viper"
 )
 
@@ -132,6 +133,9 @@ func llmToolCall(ctx context.Context, client *openai.Client, messages []openai.C
 		req := openai.ChatCompletionNewParams{
 			Model:    conf.LLM.Model,
 			Messages: messages,
+		}
+		if conf.LLM.ReasonEffort != "" {
+			req.ReasoningEffort = shared.ReasoningEffort(conf.LLM.ReasonEffort)
 		}
 		if conf.Prompt.MCPServers != nil && len(conf.Prompt.MCPServers.Tools) > 0 {
 			req.Tools = conf.Prompt.MCPServers.Tools
