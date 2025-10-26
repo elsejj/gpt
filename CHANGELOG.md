@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.10] - 2025-10-26
+
+### Added
+
+- Added `reasonEffort` configuration to control how llm generate response
+
 ## [0.2.9] - 2024-10-15
 
 ### Changed
