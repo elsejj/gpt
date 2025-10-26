@@ -58,11 +58,12 @@ Version: v` + appVersion,
 			os.Exit(1)
 		}
 		if viper.GetBool("version") || len(args) == 0 {
-			fmt.Println("Version:    ", appVersion)
-			fmt.Println("ConfigFile: ", cfgFile)
-			fmt.Println("Gateway:    ", appConf.LLM.Gateway)
-			fmt.Println("Provider:   ", appConf.LLM.Provider)
-			fmt.Println("Model:      ", appConf.LLM.Model)
+			fmt.Println("Version:      ", appVersion)
+			fmt.Println("ConfigFile:   ", cfgFile)
+			fmt.Println("Gateway:      ", appConf.LLM.Gateway)
+			fmt.Println("Provider:     ", appConf.LLM.Provider)
+			fmt.Println("Model:        ", appConf.LLM.Model)
+			fmt.Println("ReasonEffort: ", appConf.LLM.ReasonEffort)
 			os.Exit(0)
 		}
 
