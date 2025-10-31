@@ -83,6 +83,24 @@ There are two kinds of mcp server:
 
   For some existing HTTP services, they can be used as MCP services by writing an MCP configuration. see [samples/qqwry.mcp.yaml](samples/qqwry.mcp.yaml), it's proxy a IP information HTTP service as MCP, eg. `gpt -M samples/qqwry.mcp.yaml "where is 120.197.169.198's location"`
 
+## with tool
+
+Tool is a pre-defined system prompt, model, and other configurations to do specific tasks. see [Tool](internal/tools/tools.go) for more details.
+
+A example tool 'tr' is located at [tr.toml](samples/tools/tr.toml), which translate between chinese <-> english, you can use it like:
+
+```bash
+gpt -T samples/tools/tr.toml "Hello, how are you?"
+```
+
+This will output the translation result, `你好，你好吗？`
+
+the `samples/tools/tr.toml` can be copied to `$HOME/.gpt/tools/tr.toml`, then you can use it like:
+
+```bash
+gpt -T tr "Hello, how are you?"
+```
+
 # Installation
 
 ```bash

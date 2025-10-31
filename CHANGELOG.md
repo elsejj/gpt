@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.11] - 2025-10-31
+
+### Added
+
+- Add '--tool' '-T' option to enable a tool use mode.
+
+Tool is a pre-defined system prompt, model, and other configurations to do specific tasks. see [Tool](internal/tools/tools.go) for more details.
+
+A example tool 'tr' is located at [tr.toml](samples/tools/tr.toml), which translate between chinese and english, you can use it like:
+
+```bash
+gpt -T samples/tools/tr.toml "Hello, how are you?"
+```
+
+This will output the translation result, `你好，你好吗？`
+
+the `samples/tools/tr.toml` can be copied to `$HOME/.gpt/tools/tr.toml`, then you can use it like:
+
+```bash
+gpt -T tr "Hello, how are you?"
+```
+
 ## [0.2.10] - 2025-10-26
 
 ### Added
