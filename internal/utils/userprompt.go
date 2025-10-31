@@ -10,9 +10,31 @@ import (
 	"github.com/elsejj/gpt/internal/mcps"
 )
 
+func splitContentAndVariables(args []string) ([]string, map[string]string) {
+	variables := make(map[string]string)
+	content := []string{}
+
+	// find all variables with format {{varName=value}}
+	r := regexp.MustCompile(`{{([^\}=]+)=([^\}]+)}}`)
+	for _, arg := range args {
+		matches := r.FindStringSubmatch(arg)
+		if len(matches) == 3 {
+			varName := strings.TrimSpace(matches[1])
+			varValue := strings.TrimSpace(matches[2])
+			variables[varName] = varValue
+		} else {
+			content = append(content, arg)
+		}
+	}
+
+	return content, variables
+}
+
 // UserPrompt processes the user's prompt.
 // It reads files, gets MCP prompts, and replaces variables.
-func UserPrompt(args []string) string {
+func UserPrompt(args ...string) string {
+
+	args, userVariables := splitContentAndVariables(args)
 
 	var buf strings.Builder
 
@@ -69,6 +91,10 @@ func UserPrompt(args []string) string {
 		varName = strings.TrimSpace(varName)
 
 		varValue, ok := getVariableValue(varName)
+		if ok {
+			return varValue
+		}
+		varValue, ok = userVariables[varName]
 		if ok {
 			return varValue
 		}

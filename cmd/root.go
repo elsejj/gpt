@@ -10,9 +10,11 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/elsejj/gpt/internal/llm"
 	"github.com/elsejj/gpt/internal/mcps"
+	"github.com/elsejj/gpt/internal/tools"
 	"github.com/elsejj/gpt/internal/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -53,10 +55,26 @@ Version: v` + appVersion,
 		if err != nil {
 			os.Exit(1)
 		}
+
+		var tool tools.Tool
+		toolName := viper.GetString("tool")
+		if toolName != "" {
+			tool, err = tools.Load(toolName)
+			if err != nil {
+				slog.Error("Error loading tool config", "err", err)
+				os.Exit(1)
+			}
+		}
+
 		appConf, err := utils.LoadConfig(cfgFile)
 		if err != nil {
 			os.Exit(1)
 		}
+		appConf.LLM.Gateway = utils.Or(tool.URL, viper.GetString("url"), appConf.LLM.Gateway)
+		appConf.LLM.ApiKey = utils.Or(tool.Key, viper.GetString("key"), appConf.LLM.ApiKey)
+		appConf.LLM.Model = utils.Or(tool.Model, viper.GetString("model"), appConf.LLM.Model)
+		appConf.LLM.ReasonEffort = utils.Or(tool.ReasonEffort, viper.GetString("reason"), appConf.LLM.ReasonEffort)
+
 		if viper.GetBool("version") || len(args) == 0 {
 			fmt.Println("Version:      ", appVersion)
 			fmt.Println("ConfigFile:   ", cfgFile)
@@ -67,7 +85,9 @@ Version: v` + appVersion,
 			os.Exit(0)
 		}
 
-		mcpServers, err := mcps.New(viper.GetStringSlice("mcp")...)
+		MCPs := utils.Or(tool.MCPs, viper.GetStringSlice("mcp"))
+
+		mcpServers, err := mcps.New(MCPs...)
 		if err != nil {
 			slog.Error("Error creating mcp client", "err", err)
 			os.Exit(1)
@@ -75,12 +95,12 @@ Version: v` + appVersion,
 		defer mcpServers.Shutdown()
 
 		appConf.Prompt = &utils.Prompt{
-			System:        utils.UserPrompt(viper.GetStringSlice("system")),
+			System:        utils.UserPrompt(utils.Or(tool.SystemPrompt, strings.Join(viper.GetStringSlice("system"), " "))),
 			Images:        viper.GetStringSlice("images"),
-			User:          utils.UserPrompt(args),
+			User:          tool.UserPrompt(utils.UserPrompt(args...)),
 			WithUsage:     viper.GetBool("usage"),
 			JsonMode:      viper.GetBool("json"),
-			OverrideModel: viper.GetString("model"),
+			OverrideModel: utils.Or(tool.Model, viper.GetString("model")),
 			OnlyCodeBlock: viper.GetBool("code"),
 			Temperature:   viper.GetFloat64("temperature"),
 			MCPServers:    mcpServers,
@@ -139,6 +159,9 @@ func init() {
 	rootCmd.Flags().StringP("reason", "r", "", "Reasoning effort to used, can be one of [1, minimal, 2, low, 3, medium, 4, high, 0, none]")
 	rootCmd.Flags().BoolP("code", "c", false, "extract first code block if exists, useful for pipe code generation to next command")
 	rootCmd.Flags().StringArrayP("mcp", "M", []string{}, "model context provider to be used, can be a file path(stdio) or a url(sse)")
+	rootCmd.Flags().StringP("tool", "T", "", "use a tool for this request")
+	rootCmd.Flags().String("url", "", "override api URL")
+	rootCmd.Flags().String("key", "", "override api key")
 
 	viper.BindPFlags(rootCmd.Flags())
 }
@@ -160,7 +183,8 @@ func initConfig() {
 		viper.SetConfigName(".gpt")
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
+	viper.SetEnvPrefix("GPT") // will be uppercased to "GPT_"
+	viper.AutomaticEnv()      // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
