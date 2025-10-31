@@ -3,10 +3,11 @@ module github.com/elsejj/gpt
 go 1.24.7
 
 require (
+	github.com/BurntSushi/toml v1.5.0
 	github.com/goccy/go-yaml v1.18.0
-	github.com/mark3labs/mcp-go v0.41.1
-	github.com/openai/openai-go/v3 v3.3.0
-	github.com/pb33f/libopenapi v0.28.0
+	github.com/mark3labs/mcp-go v0.42.0
+	github.com/openai/openai-go/v3 v3.7.0
+	github.com/pb33f/libopenapi v0.28.1
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
 )
