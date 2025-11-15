@@ -10,12 +10,12 @@ import (
 	"github.com/elsejj/gpt/internal/mcps"
 )
 
-func splitContentAndVariables(args []string) ([]string, map[string]string) {
+func SplitContentAndVariables(args []string) ([]string, map[string]string) {
 	variables := make(map[string]string)
 	content := []string{}
 
-	// find all variables with format {{varName=value}}
-	r := regexp.MustCompile(`{{([^\}=]+)=([^\}]+)}}`)
+	// find all variables with format `varName=value`
+	r := regexp.MustCompile(`([^\}=]+)=([^\}]+)`)
 	for _, arg := range args {
 		matches := r.FindStringSubmatch(arg)
 		if len(matches) == 3 {
@@ -32,9 +32,7 @@ func splitContentAndVariables(args []string) ([]string, map[string]string) {
 
 // UserPrompt processes the user's prompt.
 // It reads files, gets MCP prompts, and replaces variables.
-func UserPrompt(args ...string) string {
-
-	args, userVariables := splitContentAndVariables(args)
+func UserPrompt(variables map[string]string, args ...string) string {
 
 	var buf strings.Builder
 
@@ -84,22 +82,7 @@ func UserPrompt(args ...string) string {
 	})
 
 	// replace all variable with format {{varName}}
-	rVar := regexp.MustCompile(`{{([^\}]+)}}`)
-	all = rVar.ReplaceAllStringFunc(all, func(s string) string {
-		varName := strings.TrimPrefix(s, "{{")
-		varName = strings.TrimSuffix(varName, "}}")
-		varName = strings.TrimSpace(varName)
-
-		varValue, ok := getVariableValue(varName)
-		if ok {
-			return varValue
-		}
-		varValue, ok = userVariables[varName]
-		if ok {
-			return varValue
-		}
-		return s
-	})
+	all = ExpandVariables(all, variables, globalVariables)
 
 	return all
 }
@@ -116,13 +99,4 @@ func shellName() string {
 		return "powershell"
 	}
 	return "bash"
-}
-
-// getVariableValue gets the value of a variable.
-// It supports global variables like OS, TODAY, and SHELL.
-func getVariableValue(varName string) (string, bool) {
-	if val, ok := globalVariables[strings.ToUpper(varName)]; ok {
-		return val, true
-	}
-	return "", false
 }

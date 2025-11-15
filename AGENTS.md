@@ -25,5 +25,6 @@ other directories don't need to care about them.
 
 - use `make local` to build a local binary, also use it as check syntax errors
 - use `go test ./...` to run tests
+- use default `GOCACHE` is okay, don't need to set it manually
 
 Follow standard Go 1.20 practices: tabs for indentation, exported identifiers use CamelCase, and packages stay lower\*snake for clarity. Run gofmt -w on touched files and goimports if available to keep imports tidy

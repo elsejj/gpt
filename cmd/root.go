@@ -39,6 +39,8 @@ Version: v` + appVersion,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 
+		args, variables := utils.SplitContentAndVariables(args)
+
 		verbose := viper.GetInt("verbose")
 		if verbose >= 2 {
 			slog.SetLogLoggerLevel(slog.LevelDebug)
@@ -95,9 +97,9 @@ Version: v` + appVersion,
 		defer mcpServers.Shutdown()
 
 		appConf.Prompt = &utils.Prompt{
-			System:        utils.UserPrompt(utils.Or(tool.SystemPrompt, strings.Join(viper.GetStringSlice("system"), " "))),
+			System:        utils.UserPrompt(variables, utils.Or(tool.SystemPrompt, strings.Join(viper.GetStringSlice("system"), " "))),
 			Images:        viper.GetStringSlice("images"),
-			User:          tool.UserPrompt(utils.UserPrompt(args...)),
+			User:          tool.UserPrompt(utils.UserPrompt(variables, args...)),
 			WithUsage:     viper.GetBool("usage"),
 			JsonMode:      viper.GetBool("json"),
 			OverrideModel: utils.Or(tool.Model, viper.GetString("model")),
@@ -108,8 +110,10 @@ Version: v` + appVersion,
 
 		appConf.PickupModel()
 		var w io.Writer
-		if appConf.Prompt.OnlyCodeBlock || appConf.Prompt.JsonMode {
-			w = bytes.NewBuffer(nil)
+		var buf *bytes.Buffer
+		if appConf.Prompt.OnlyCodeBlock || appConf.Prompt.JsonMode || strings.TrimSpace(tool.Action) != "" {
+			buf = bytes.NewBuffer(nil)
+			w = buf
 		} else {
 			w = os.Stdout
 		}
@@ -119,9 +123,21 @@ Version: v` + appVersion,
 			os.Exit(1)
 		}
 
-		if appConf.Prompt.OnlyCodeBlock || appConf.Prompt.JsonMode {
-			buf := w.(*bytes.Buffer)
-			os.Stdout.Write(llm.ExtractCodeBlock(buf.Bytes()))
+		if buf != nil {
+			result := buf.Bytes()
+			if appConf.Prompt.OnlyCodeBlock || appConf.Prompt.JsonMode {
+				result = llm.ExtractCodeBlock(result)
+			}
+
+			if strings.TrimSpace(tool.Action) != "" {
+				confirmed := viper.GetBool("confirmed")
+				if err := tool.DoAction(result, variables, confirmed); err != nil {
+					slog.Error("Error executing tool action", "err", err)
+					os.Exit(1)
+				}
+			} else if appConf.Prompt.OnlyCodeBlock || appConf.Prompt.JsonMode {
+				os.Stdout.Write(result)
+			}
 		}
 	},
 }
@@ -162,6 +178,7 @@ func init() {
 	rootCmd.Flags().StringP("tool", "t", "", "use a tool for this request")
 	rootCmd.Flags().String("url", "", "override api URL")
 	rootCmd.Flags().String("key", "", "override api key")
+	rootCmd.Flags().BoolP("confirmed", "y", false, "confirm before executing non-output actions")
 
 	viper.BindPFlags(rootCmd.Flags())
 }

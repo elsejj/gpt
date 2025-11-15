@@ -7,18 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.12] - 2025-11-15
+
+### Added
+
+- `Tool` now supports an post action, which can be used to execute some after llm response is generated. There are following actions supported:
+  - `output`: output the content to stdout (default), let action be empty or `output`
+  - `copy`: copy the content to clipboard, let action to be `copy`
+  - `save`: save the content to a file, let action be any file name
+  - `execute`:
+    - when action is `execute`, `run`, or `exec`, the content will be treated as a shell command and executed directly.
+    - when action is a non-empty string other than above, it will be treated as a shell command template, and the content will be passed as argument to the command. For example, if action is `echo`, and content is `hello`, then the command executed will be `echo "hello"`.
+  - see
+    - [tr.toml](samples/tools/tr.toml) : a translation tool that copy the translation result to clipboard. `gpt -t tr "Hello, how are you?"` will copy `你好，你好吗？` to clipboard
+    - [pa.toml](samples/tools/pa.toml) : a command assistant that build shell command from user input and execute it directly. `gpt -t pa "list all files in current directory"` will execute `ls -a` command directly.
+- `-t` or `--tool` option to specify a tool file to use. `-T` is changed to set temperature.
+
 ## [0.2.11] - 2025-10-31
 
 ### Added
 
-- Add '--tool' '-T' option to enable a tool use mode.
+- Add '--tool' '-t' option to enable a tool use mode.
 
 Tool is a pre-defined system prompt, model, and other configurations to do specific tasks. see [Tool](internal/tools/tools.go) for more details.
 
 A example tool 'tr' is located at [tr.toml](samples/tools/tr.toml), which translate between chinese and english, you can use it like:
 
 ```bash
-gpt -T samples/tools/tr.toml "Hello, how are you?"
+gpt -t samples/tools/tr.toml "Hello, how are you?"
 ```
 
 This will output the translation result, `你好，你好吗？`
@@ -26,7 +42,7 @@ This will output the translation result, `你好，你好吗？`
 the `samples/tools/tr.toml` can be copied to `$HOME/.gpt/tools/tr.toml`, then you can use it like:
 
 ```bash
-gpt -T tr "Hello, how are you?"
+gpt -t tr "Hello, how are you?"
 ```
 
 ## [0.2.10] - 2025-10-26

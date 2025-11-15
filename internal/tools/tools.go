@@ -21,6 +21,7 @@ type Tool struct {
 	Temperature  *float64 `yaml:"temperature,omitempty" json:"temperature,omitempty" toml:"temperature,omitempty"`
 	SystemPrompt string   `yaml:"system,omitempty" json:"system,omitempty" toml:"system,omitempty"`
 	UserTemplate string   `yaml:"user,omitempty" json:"user,omitempty" toml:"user,omitempty"`
+	Action       string   `yaml:"action,omitempty" json:"action,omitempty" toml:"action,omitempty"`
 	MCPs         []string `yaml:"mcps,omitempty" json:"mcps,omitempty" toml:"mcps,omitempty"`
 }
 
