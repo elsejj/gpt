@@ -79,7 +79,7 @@ func Chat(conf *utils.AppConf, w io.Writer) error {
 		return err
 	}
 
-	w.Write([]byte("\n"))
+	//w.Write([]byte("\n"))
 
 	slog.Debug("allMessages", "messages", messages)
 

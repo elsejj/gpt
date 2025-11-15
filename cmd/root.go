@@ -148,7 +148,7 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().Float64P("temperature", "t", 1.0, "the temperature of the model")
+	rootCmd.Flags().Float64P("temperature", "T", 1.0, "the temperature of the model")
 	rootCmd.Flags().StringArrayP("system", "s", []string{}, "System prompt")
 	rootCmd.Flags().StringArrayP("images", "i", []string{}, "Images to be used as prompt")
 	rootCmd.Flags().BoolP("usage", "u", false, "Show usage")
@@ -159,7 +159,7 @@ func init() {
 	rootCmd.Flags().StringP("reason", "r", "", "Reasoning effort to used, can be one of [1, minimal, 2, low, 3, medium, 4, high, 0, none]")
 	rootCmd.Flags().BoolP("code", "c", false, "extract first code block if exists, useful for pipe code generation to next command")
 	rootCmd.Flags().StringArrayP("mcp", "M", []string{}, "model context provider to be used, can be a file path(stdio) or a url(sse)")
-	rootCmd.Flags().StringP("tool", "T", "", "use a tool for this request")
+	rootCmd.Flags().StringP("tool", "t", "", "use a tool for this request")
 	rootCmd.Flags().String("url", "", "override api URL")
 	rootCmd.Flags().String("key", "", "override api key")
 
